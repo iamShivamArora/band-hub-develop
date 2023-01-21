@@ -1,0 +1,362 @@
+import 'dart:io';
+
+import 'package:band_hub/ui/manager/profile/controller/profile_controller.dart';
+import 'package:band_hub/widgets/app_color.dart';
+import 'package:band_hub/widgets/app_text.dart';
+import 'package:band_hub/widgets/custom_phone_text_field.dart';
+import 'package:band_hub/widgets/custom_text_field.dart';
+import 'package:band_hub/widgets/elevated_btn.dart';
+import 'package:band_hub/widgets/helper_widget.dart';
+import 'package:band_hub/widgets/image_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../widgets/country_picker/country.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  ProfileController profileController = Get.put(ProfileController());
+
+  File? imageFile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: AppColor.whiteColor,
+        appBar: HelperWidget.customAppBar(
+            title: profileController.isEditable.value
+                ? "Edit Profile"
+                : 'My Profile'),
+        body: SingleChildScrollView(
+          child: Obx(() {
+            return GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () =>
+                  FocusScope.of(context).requestFocus(FocusScopeNode()),
+              child: Stack(
+                children: [
+                  Container(
+                    color: const Color(0xffE9E9E9),
+                    height: 150,
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(
+                        height: 75,
+                      ),
+                      Center(
+                        child: InkWell(
+                          onTap: () {
+                            if (profileController.isEditable.value) {
+                              showImagePicker();
+                            }
+                          },
+                          child: Container(
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: AppColor.grayColor.withAlpha(80),
+                                      blurRadius: 10.0,
+                                      offset: const Offset(0, 4)),
+                                ]),
+                            child: Stack(children: [
+                              SizedBox(
+                                  height: 150,
+                                  width: 150,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: imageFile != null
+                                        ? Image.file(
+                                            imageFile!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.asset(
+                                            'assets/images/ic_user.png'),
+                                  )),
+                              Visibility(
+                                visible: profileController.isEditable.value,
+                                child: Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Image.asset(
+                                      'assets/images/ic_camera_red.png',
+                                      height: 40,
+                                    )),
+                              )
+                            ]),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      AppText(
+                        text: 'Jolly Marker',
+                        fontWeight: FontWeight.w600,
+                        textSize: 18,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            profileController.isEditable.value
+                                ? Container(
+                                    width: Get.width,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15, vertical: 20),
+                                    decoration: BoxDecoration(
+                                        color: AppColor.whiteColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: AppColor.grayColor
+                                                  .withAlpha(80),
+                                              blurRadius: 10.0,
+                                              offset: const Offset(0, 4)),
+                                        ]),
+                                    child: Column(
+                                      children: [
+                                        const SimpleTf(
+                                          title: 'Full Name',
+                                          height: 45,
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        SimplePhoneTf(
+                                            selectedCountry: Country.IN,
+                                            title: 'Phone Number',
+                                            onChanged: (_) {},
+                                            height: 45),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        const SimpleTf(
+                                          title: 'Email',
+                                          height: 45,
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        const SimpleTf(
+                                          title: 'About',
+                                          height: 100,
+                                          lines: 4,
+                                        )
+                                      ],
+                                    ))
+                                : Container(
+                                    width: Get.width,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15, vertical: 20),
+                                    decoration: BoxDecoration(
+                                        color: AppColor.whiteColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: AppColor.grayColor
+                                                  .withAlpha(80),
+                                              blurRadius: 10.0,
+                                              offset: const Offset(0, 4)),
+                                        ]),
+                                    child: Column(children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          AppText(
+                                            text: 'Name',
+                                            textSize: 13,
+                                          ),
+                                          AppText(
+                                            text: 'Jolly Marker',
+                                            textSize: 13,
+                                          )
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          AppText(
+                                            text: 'Email',
+                                            textSize: 13,
+                                          ),
+                                          AppText(
+                                            text: 'john0007@gmail.com',
+                                            textSize: 13,
+                                          )
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          AppText(
+                                            text: 'Phone Number',
+                                            textSize: 13,
+                                          ),
+                                          AppText(
+                                            text: '+1 7895 5788 5789',
+                                            textSize: 13,
+                                          )
+                                        ],
+                                      ), const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          AppText(
+                                            text: 'About',
+                                            textSize: 13,
+                                          ),
+                                          const SizedBox(width: 80,),
+                                          Expanded(
+                                            child: AppText(
+                                              textAlign: TextAlign.right,
+                                              text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+                                              textSize: 13,
+                                              textColor: AppColor.blackColor,
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    ]),
+                                  ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            ElevatedBtn(
+                              text: profileController.isEditable.value
+                                  ? "Update"
+                                  : "Edit Profile",
+                              onTap: () {
+                                profileController.isEditable.value =
+                                    !profileController.isEditable.value;
+                                setState(() {});
+                              },
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ));
+  }
+
+  void showImagePicker() {
+    showDialog(
+      context: Get.context!,
+      builder: (_) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        insetPadding: EdgeInsets.zero,
+        content: Container(
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          width: MediaQuery.of(context).size.width / 1.3,
+          height: 200,
+          decoration: BoxDecoration(
+              color: AppColor.whiteColor,
+              borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              AppText(
+                text: 'Select Image',
+                textColor: AppColor.blackColor,
+                fontWeight: FontWeight.w600,
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              InkWell(
+                onTap: () async {
+                  Get.back();
+                  String? selectedImage = await ImagePickerUtility()
+                      .pickImageFromCamera(isCropping: true);
+                  imageFile = File(selectedImage!);
+                  setState(() {});
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.camera_alt,
+                      color: AppColor.blackColor,
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    AppText(
+                      text: 'Select image from camera',
+                      textSize: 12,
+                      textColor: AppColor.blackColor,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(vertical: 15),
+                width: 200,
+                color: AppColor.grayColor.withOpacity(.40),
+              ),
+              InkWell(
+                onTap: () async {
+                  Get.back();
+                  String? selectedImage = await ImagePickerUtility()
+                      .pickImageFromGallery(isCropping: true);
+                  imageFile = File(selectedImage!);
+                  setState(() {});
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.photo,
+                      color: AppColor.blackColor,
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    AppText(
+                      text: 'Select image from gallery',
+                      textSize: 12,
+                      textColor: AppColor.blackColor,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

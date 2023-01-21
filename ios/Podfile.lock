@@ -1,0 +1,85 @@
+PODS:
+  - Flutter (1.0.0)
+  - geocoding (1.0.5):
+    - Flutter
+  - geolocator_apple (1.2.0):
+    - Flutter
+  - google_maps_flutter_ios (0.0.1):
+    - Flutter
+    - GoogleMaps
+  - GoogleMaps (7.1.0):
+    - GoogleMaps/Maps (= 7.1.0)
+  - GoogleMaps/Base (7.1.0)
+  - GoogleMaps/Maps (7.1.0):
+    - GoogleMaps/Base
+  - image_cropper (0.0.4):
+    - Flutter
+    - TOCropViewController (~> 2.6.1)
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - image_viewer (0.0.1):
+    - Flutter
+  - location (0.0.1):
+    - Flutter
+  - path_provider_ios (0.0.1):
+    - Flutter
+  - permission_handler_apple (9.0.4):
+    - Flutter
+  - TOCropViewController (2.6.1)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - geocoding (from `.symlinks/plugins/geocoding/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
+  - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
+  - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - image_viewer (from `.symlinks/plugins/image_viewer/ios`)
+  - location (from `.symlinks/plugins/location/ios`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+
+SPEC REPOS:
+  trunk:
+    - GoogleMaps
+    - TOCropViewController
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  geocoding:
+    :path: ".symlinks/plugins/geocoding/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/ios"
+  google_maps_flutter_ios:
+    :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
+  image_cropper:
+    :path: ".symlinks/plugins/image_cropper/ios"
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
+  image_viewer:
+    :path: ".symlinks/plugins/image_viewer/ios"
+  location:
+    :path: ".symlinks/plugins/location/ios"
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  geocoding: 32cfcdb16d38d907caaba65e2e42ad10d38bee58
+  geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
+  google_maps_flutter_ios: 66201f392bf62d500f07670a30488a247b9bb5b9
+  GoogleMaps: bc56ffb0324e345a2d91bac1a64a920f9c8f1b20
+  image_cropper: 60c2789d1f1a78c873235d4319ca0c34a69f2d98
+  image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
+  image_viewer: 3ff6248139d02dd4e15d4329bb36c69f00e615e2
+  location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
+  TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
+
+PODFILE CHECKSUM: 6255b60fb9152ab0cf0a8454c311093e9408dfe4
+
+COCOAPODS: 1.11.3

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "353692637063",
+    "project_id": "band-hub-a88e9",
+    "storage_bucket": "band-hub-a88e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353692637063:android:d600f7a7dc96b2294ca522",
+        "android_client_info": {
+          "package_name": "com.app.bandhub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "353692637063-crdch4b46f2tb920vti9mf63694ehco7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.bandhub",
+            "certificate_hash": "353ad204e419810d411f7fb0cfeba05a3c73c0bc"
+          }
+        },
+        {
+          "client_id": "353692637063-mld7umlch5abcc176hlvk2b94q428j6v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_2EDgLFimo_5fhJUQUtxzTqjU1f496Pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "353692637063-mld7umlch5abcc176hlvk2b94q428j6v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "353692637063-s4rqasmv5t1kaenlqith691pj7o7k1bn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.app.bandhub"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
