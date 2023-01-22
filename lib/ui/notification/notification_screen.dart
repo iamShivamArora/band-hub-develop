@@ -8,6 +8,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:smooth_star_rating_null_safety/smooth_star_rating_null_safety.dart';
+
 import '../../models/auth/notification_listing_response.dart';
 import '../../util/common_funcations.dart';
 
@@ -93,24 +95,28 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         ),
                                         const SizedBox(
                                           height: 2,
-                                        ),
-                                        AppText(
-                                          text: snapshot.data!.body[index]
-                                              .message,
-                                          textSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        const SizedBox(
-                                          height: 3,
-                                        ),
-                                        Image.asset(
-                                          'assets/images/ic_star.png',
-                                          width: 60,
-                                        ),
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
+                                            ),
+                                            AppText(
+                                              text: snapshot
+                                                  .data!.body[index].message,
+                                              textSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            const SizedBox(
+                                              height: 3,
+                                            ),
+                                            SmoothStarRating(
+                                              allowHalfRating: false,
+                                              starCount: 5,
+                                              rating: 2,
+                                              size: 15.0,
+                                              color: Colors.amber,
+                                              borderColor: Colors.amber,
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            /* Row(
                                           children: [
                                             AppText(
                                               text: "Start Date & Time",
@@ -139,8 +145,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ],
-                                        ),
-                                      ],
+                                        ),*/
+                                          ],
                                     ))
                               ],
                             ),

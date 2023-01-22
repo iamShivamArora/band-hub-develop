@@ -81,19 +81,24 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                             physics: const NeverScrollableScrollPhysics(),
                             itemBuilder: ((context, index) {
                               return InkWell(
-                                onTap: () =>
-                                    Get.toNamed(Routes.musicianDetailScreen),
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 15),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      color: AppColor.whiteColor,
-                                      borderRadius: BorderRadius.circular(15),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color:
-                                              AppColor.grayColor.withAlpha(40),
+                                onTap: () => Get.toNamed(
+                                        Routes.musicianDetailScreen,
+                                        arguments: {
+                                          'userId': snapshot
+                                              .data!.body[index].id
+                                              .toString()
+                                        }),
+                                    child: Container(
+                                      margin: const EdgeInsets.only(bottom: 15),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15, vertical: 10),
+                                      decoration: BoxDecoration(
+                                          color: AppColor.whiteColor,
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppColor.grayColor.withAlpha(40),
                                           blurRadius: 10.0,
                                           offset: const Offset(2, 2),
                                         ),

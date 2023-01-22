@@ -28,9 +28,9 @@ class GlobalVariable {
   static const createEvent = "create_event";
   static const deleteEvent = "deleteEvent";
   static const userListByCat = "userlist";
-
-
-
+  static const userDetail = "userDetail";
+  static const myEventList = "myEventList";
+  static const bookingsCalendar = "bookings?date=";
 
   /////
   static const userData = "userData";
@@ -38,6 +38,4 @@ class GlobalVariable {
   static const notificationStatus = "notificationStatus";
   static const isRemember = "isRemember";
   static const rememberData = "rememberData";
-
-
 }

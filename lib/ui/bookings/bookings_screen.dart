@@ -1,10 +1,18 @@
+import 'dart:convert';
+
 import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
+import '../../util/common_funcations.dart';
+import '../../util/global_variable.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({Key? key}) : super(key: key);
@@ -23,6 +31,7 @@ class _BookingScreenState extends State<BookingScreen> {
   int selectedYear = 0;
   int selectedMonth = 0;
   String selectedDate = "";
+  String selectedFullDate = "";
 
   @override
   void initState() {
@@ -79,10 +88,10 @@ class _BookingScreenState extends State<BookingScreen> {
 
     for (int i = 0; i < lastday; i++) {
       bool isSelected = selectedYear != DateTime.now().year ||
-              selectedMonth != DateTime.now().month
+          selectedMonth != DateTime.now().month
           ? false
           : DateTime(selectedYear, selectedMonth, i).day ==
-              DateTime.now().day - 1;
+          DateTime.now().day - 1;
       dateList.add(DayModel(date: (i + 1).toString(), isSelected: isSelected));
     }
   }
@@ -125,12 +134,12 @@ class _BookingScreenState extends State<BookingScreen> {
                     ),
                     Expanded(
                         child: Center(
-                      child: AppText(
-                        text: selectedyearMonth,
-                        textSize: 13,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    )),
+                          child: AppText(
+                            text: selectedyearMonth,
+                            textSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        )),
                     InkWell(
                         onTap: () {
                           if (selectedMonth == 12) {
@@ -159,7 +168,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     primary: false,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisSpacing: 5,
                       mainAxisSpacing: 5,
                       crossAxisCount: 7,
@@ -184,7 +193,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     primary: false,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisSpacing: 5,
                       mainAxisSpacing: 5,
                       crossAxisCount: 7,
@@ -199,12 +208,17 @@ class _BookingScreenState extends State<BookingScreen> {
                           }
                           dateList.forEach((element) {
                             element.isSelected = false;
-
                           });
                           dayModel.isSelected = true;
                           selectedDate = dayModel.date!;
-                          print(selectedMonth);
-                          print(selectedYear);
+                          //yyyy-MM-dd
+                          selectedFullDate = selectedYear.toString() +
+                              '-' +
+                              CommonFunctions().zeroBeforeIfNeeded(
+                                  selectedMonth.toString()) +
+                              '-' +
+                              CommonFunctions()
+                                  .zeroBeforeIfNeeded(selectedDate);
 
                           setState(() {});
                         },
@@ -243,86 +257,140 @@ class _BookingScreenState extends State<BookingScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                GridView.builder(
-                    shrinkWrap: true,
-                    primary: false,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisSpacing: 5,
-                      mainAxisSpacing: 5,
-                      crossAxisCount: 2,
-                      childAspectRatio: MediaQuery.of(context).size.width /
-                          (MediaQuery.of(context).size.height / 3),
-                    ),
-                    itemCount: 6,
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          Get.toNamed(Routes.bookingDetailScreen,
-                              arguments: {"isFromCurrent": 'false'});
-                        },
-                        child: Stack(
-                          children: [
-                            Container(
-                              height: 120,
-                              width: Get.width,
-                              foregroundDecoration: BoxDecoration(
-                                color: AppColor.blackColor.withAlpha(20),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  'assets/images/ic_placeholder.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                FutureBuilder(
+                    future: eventListingApi(context, selectedFullDate),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return GridView.builder(
+                            shrinkWrap: true,
+                            primary: false,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 5,
+                              crossAxisCount: 2,
+                              childAspectRatio:
+                                  MediaQuery.of(context).size.width /
+                                      (MediaQuery.of(context).size.height / 3),
                             ),
-                            Positioned.fill(
-                              child: Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      AppText(
-                                        text: "Event 0${index + 1}",
-                                        textSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        textColor: AppColor.whiteColor,
+                            itemCount: 6,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () {
+                                  Get.toNamed(Routes.bookingDetailScreen,
+                                      arguments: {"isFromCurrent": 'false'});
+                                },
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      height: 120,
+                                      width: Get.width,
+                                      foregroundDecoration: BoxDecoration(
+                                        color:
+                                            AppColor.blackColor.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
-                                      Row(children: [
-                                        Image.asset(
-                                          'assets/images/ic_location_mark.png',
-                                          height: 12,
-                                          color: AppColor.whiteColor,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Image.asset(
+                                          'assets/images/ic_placeholder.png',
+                                          fit: BoxFit.cover,
                                         ),
-                                        AppText(
-                                          text: " New York",
-                                          textSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                          textColor: AppColor.whiteColor,
+                                      ),
+                                    ),
+                                    Positioned.fill(
+                                      child: Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 15, vertical: 10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              AppText(
+                                                text: "Event 0${index + 1}",
+                                                textSize: 15,
+                                                fontWeight: FontWeight.w400,
+                                                textColor: AppColor.whiteColor,
+                                              ),
+                                              Row(children: [
+                                                Image.asset(
+                                                  'assets/images/ic_location_mark.png',
+                                                  height: 12,
+                                                  color: AppColor.whiteColor,
+                                                ),
+                                                AppText(
+                                                  text: " New York",
+                                                  textSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                  textColor:
+                                                      AppColor.whiteColor,
+                                                ),
+                                              ])
+                                            ],
+                                          ),
                                         ),
-                                      ])
-                                    ],
-                                  ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
-                      );
+                              );
+                            });
+                      } else if (snapshot.hasError) {
+                        return Center(
+                            child: AppText(
+                          text: snapshot.error.toString(),
+                          fontWeight: FontWeight.w500,
+                          textSize: 16,
+                        ));
+                      }
+                      return Center(child: CommonFunctions().loadingCircle());
                     })
               ]),
             )));
   }
 
+  Future<String> eventListingApi(BuildContext ctx, String date) async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
 
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
 
+    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    String sendDate = date.isEmpty ? currentDate : date;
+    print(sendDate);
+    var response = await http.get(
+        Uri.parse(GlobalVariable.baseUrl +
+            GlobalVariable.bookingsCalendar +
+            sendDate),
+        headers: await CommonFunctions().getHeader());
+
+    print(response.body);
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+
+      if (res['code'] != 200 || res == null) {
+        String error = res['msg'];
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+      // ManagerHomeResponse result = ManagerHomeResponse.fromJson(res);
+
+      return '';
+    } catch (error) {
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
+    }
+  }
 }
 
 class DayModel {

@@ -3,6 +3,7 @@ import 'package:band_hub/widgets/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:intl/intl.dart';
+
 import 'global_variable.dart';
 class CommonFunctions {
   Future<Map<String, String>> getHeader() async {
@@ -38,24 +39,31 @@ class CommonFunctions {
     DateTime tempDate = new DateFormat("yyyy-MM-dd").parse(savedDateString);
     String date = DateFormat("dd.MM.yyyy").format(tempDate);
     return date;
-
   }
-  String changeDateToServerFormat(String savedDateString){
+
+  String changeDateToServerFormat(String savedDateString) {
     DateTime tempDate = new DateFormat("dd/MM/yyyy").parse(savedDateString);
     String date = DateFormat("yyyy-MM-dd").format(tempDate);
     return date;
-
   }
-  String daeTimeToStringDateorTime(DateTime savedDateString,String format){
+
+  String zeroBeforeIfNeeded(String value) {
+    if (value.length == 1) {
+      return '0' + value;
+    } else {
+      return value;
+    }
+  }
+
+  String daeTimeToStringDateorTime(DateTime savedDateString, String format) {
     //dd.MM.yyyy
-    if(format.isEmpty){
+    if (format.isEmpty) {
       format = "dd/MM/yyyy";
     }
     final DateFormat formatter = DateFormat(format);
     final String date = formatter.format(savedDateString);
 
     return date;
-
   }
   String timeAgoFormat(String savedDateString){
     DateTime tempDate = new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(savedDateString);
