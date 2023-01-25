@@ -26,13 +26,17 @@ class ManagerEventDetailScreen extends StatefulWidget {
 
 class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
   String eventId = "";
+  String isFromCurrent = "";
   PageController controller =
-  PageController(viewportFraction: 1, keepPage: true);
+      PageController(viewportFraction: 1, keepPage: true);
+
   @override
   void initState() {
     eventId = Get.arguments['eventId'] ?? "";
+    isFromCurrent = Get.arguments['isFromCurrent'] ?? "";
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -207,24 +211,65 @@ class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
                                     textSize: 12,
                                     fontWeight: FontWeight.w400,
                                   ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Divider(
+                            height: 10,
+                            color: AppColor.grayColor.withOpacity(.30),
+                            thickness: 1.2,
+                          ),
+                          Visibility(
+                            visible: snapshot.data!.body.status != 0,
+                            child: Container(
+                              margin: EdgeInsets.only(top: 20),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 15),
+                              decoration: BoxDecoration(
+                                  color: AppColor.whiteColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColor.grayColor.withAlpha(80),
+                                      blurRadius: 10.0,
+                                      offset: const Offset(2, 2),
+                                    ),
+                                  ]),
+                              child: Row(
+                                children: [
+                                  AppText(
+                                    text: "Status",
+                                    textSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  const Spacer(),
+                                  AppText(
+                                    text: CommonFunctions().getStatusType(
+                                        snapshot.data!.body.status),
+                                    textSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    textColor: CommonFunctions()
+                                        .getColorForStatus(
+                                            snapshot.data!.body.status),
+                                  ),
                                 ],
                               ),
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Divider(
-                                height: 10,
-                                color: AppColor.grayColor.withOpacity(.30),
-                                thickness: 1.2,
-                              ),
-                              const SizedBox(
-                                height: 85,
-                              ),
-                              ElevatedBtn(
-                                text: 'Invite Musicians',
-                                onTap: () => Get.toNamed(Routes.musicianCategoryScreen),
-                              )
-                            ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          ElevatedBtn(
+                            text: 'Invite Musicians',
+                            onTap: () => Get.toNamed(
+                                Routes.musicianCategoryScreen,
+                                arguments: {
+                                  'eventId': snapshot.data!.body.id.toString()
+                                }),
+                          )
+                        ],
                           ))
                     ],
                   ));

@@ -2,8 +2,7 @@ class GlobalVariable {
   static const baseUrl = url + "/api/";
   static const url = "https://app.bandhub.com.au";
   static const imageUrl = "http://app.bandhub.com.au/image";
-
-
+  static const bundel = "com.app.bandhub";
 
   static const login = "login";
   static const logout = "logout";
@@ -26,11 +25,13 @@ class GlobalVariable {
   static const favAndUnfav = "fav_unfav";
   static const notificationList = "notificationList";
   static const createEvent = "create_event";
+  static const editEvent = "edit_event";
   static const deleteEvent = "deleteEvent";
   static const userListByCat = "userlist";
   static const userDetail = "userDetail";
   static const myEventList = "myEventList";
   static const bookingsCalendar = "bookings?date=";
+  static const inviteUsers = "inviteUsers";
 
   /////
   static const userData = "userData";

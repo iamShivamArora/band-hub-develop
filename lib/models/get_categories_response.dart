@@ -9,13 +9,14 @@ class GetCategoriesResponse {
   late final bool success;
   late final int code;
   late final String msg;
-  late final List<Body> body;
+  late final List<CategoriesBody> body;
 
   GetCategoriesResponse.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     code = json['code'];
     msg = json['msg'];
-    body = List.from(json['body']).map((e) => Body.fromJson(e)).toList();
+    body =
+        List.from(json['body']).map((e) => CategoriesBody.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -28,8 +29,8 @@ class GetCategoriesResponse {
   }
 }
 
-class Body {
-  Body({
+class CategoriesBody {
+  CategoriesBody({
     required this.id,
     required this.name,
     required this.type,
@@ -45,7 +46,7 @@ class Body {
   late final String createdAt;
   late final String updatedAt;
 
-  Body.fromJson(Map<String, dynamic> json) {
+  CategoriesBody.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     type = json['type'];

@@ -14,7 +14,9 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../../../models/get_categories_response.dart';
+import '../../../models/manager/manager_home_response.dart';
 import '../../../models/success_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
@@ -31,6 +33,7 @@ class CreateEventScreen extends StatefulWidget {
 class _CreateEventScreenState extends State<CreateEventScreen> {
   String category = 'Select';
   String categoryId = '';
+  String eventId = '';
   List<String> imagesList = [];
   bool isFromEdit = false;
   int selectedTime = 0;
@@ -47,19 +50,51 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   final locationController = TextEditingController();
   List<CategoryModel> categoryList = [];
+  EventsListResponse? eventData;
 
   @override
   void initState() {
     super.initState();
     isFromEdit = Get.arguments['isEdit'] ?? false;
+    eventData = Get.arguments['data'];
+    editDataSet();
     getCategoryList();
   }
+
+  void editDataSet() {
+    if (isFromEdit) {
+      eventId = eventData!.id.toString();
+      controllerName.text = eventData!.name;
+      locationController.text = eventData!.location;
+      controllerStartDate.text =
+          CommonFunctions().changeServerDateDisplayFormat(eventData!.startDate);
+      controllerEndDate.text =
+          CommonFunctions().changeServerDateDisplayFormat(eventData!.endDate);
+      controllerStartTime.text = eventData!.startTime;
+      controllerEndTime.text = eventData!.endTime;
+      controllerDes.text = eventData!.description;
+      lat = eventData!.lat;
+      lng = eventData!.lng;
+      categoryId = eventData!.categoryId.toString();
+      eventData!.eventImages.forEach((element) {
+        imagesList.add(element.images);
+      });
+    }
+  }
+
   getCategoryList() async {
     GetCategoriesResponse result = await categoryListApi(context);
     result.body.forEach((element) {
       categoryList.add(CategoryModel(
           name: element.name, id: element.id.toString(), underLine: false));
     });
+    if (categoryId.isNotEmpty) {
+      categoryList.forEach((element) {
+        if (element.id == categoryId) {
+          category = element.name;
+        }
+      });
+    }
 
     setState(() {});
   }
@@ -124,34 +159,46 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                             children: [
                               Row(
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(5),
-                                    child: Image.file(
-                                      File(imagesList[index]),
-                                      height: 55,
-                                      fit: BoxFit.cover,
-                                      width: 65,
-                                    ),
-                                  ),
+                                  imagesList[index]
+                                          .contains(GlobalVariable.imageUrl)
+                                      ? CommonFunctions().setNetworkImages(
+                                          imageUrl: imagesList[index],
+                                          circle: 5,
+                                          height: 55,
+                                          width: 65,
+                                          boxFit: BoxFit.cover)
+                                      : ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          child: Image.file(
+                                            File(imagesList[index]),
+                                            height: 55,
+                                            fit: BoxFit.cover,
+                                            width: 65,
+                                          ),
+                                        ),
                                   const SizedBox(
                                     width: 10,
                                   ),
                                 ],
                               ),
-                              Positioned(
-                                right: 0,
-                                child: InkWell(
-                                  onTap: (() {
-                                    imagesList.removeAt(index);
-                                    setState(() {});
-                                  }),
-                                  child: const Icon(
-                                    Icons.cancel,
-                                    size: 20,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              )
+                              imagesList[index]
+                                      .contains(GlobalVariable.imageUrl)
+                                  ? Container()
+                                  : Positioned(
+                                      right: 0,
+                                      child: InkWell(
+                                        onTap: (() {
+                                          imagesList.removeAt(index);
+                                          setState(() {});
+                                        }),
+                                        child: const Icon(
+                                          Icons.cancel,
+                                          size: 20,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    )
                             ],
                           );
                         }),
@@ -298,9 +345,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             ),
             ElevatedBtn(
               onTap: () {
+                var newImage = false;
                 if (validateFields().isEmpty) {
                   //api call
-                  createEventApi(context);
+                  imagesList.forEach((element) {
+                    if (element.contains(GlobalVariable.bundel)) {
+                      newImage = true;
+                    }
+                  });
+                  if (newImage) {
+                    createEventApi(context);
+                  } else {
+                    createEventWithoutApi(context);
+                  }
                 } else {
                   Fluttertoast.showToast(msg: validateFields());
                 }
@@ -493,7 +550,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return "Please select event images";
     } else if (controllerName.text.trim().toString().isEmpty) {
       return "Please enter event name";
-    } else if ( categoryId.isEmpty) {
+    } else if (categoryId.isEmpty) {
       return "Please select event category";
     } else if (locationController.text.trim().toString().isEmpty) {
       return "Please select event location";
@@ -513,27 +570,41 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future createEventApi(BuildContext ctx) async {
-
     Map<String, String> body = {
       "event_name": controllerName.text.trim().toString(),
       "categoryId": categoryId,
       "location": locationController.text.trim().toString(),
-      "startDate": CommonFunctions().changeDateToServerFormat(controllerStartDate.text.trim().toString()),
+      "startDate": CommonFunctions()
+          .changeDateToServerFormat(controllerStartDate.text.trim().toString()),
       "startTime": controllerStartTime.text.trim().toString(),
-      "endDate": CommonFunctions().changeDateToServerFormat(controllerEndDate.text.trim().toString()),
+      "endDate": CommonFunctions()
+          .changeDateToServerFormat(controllerEndDate.text.trim().toString()),
       "endTime": controllerEndTime.text.trim().toString(),
       "description": controllerDes.text.trim().toString(),
       "lat": lat,
       "lng": lng,
     };
-    print(imagesList);
+    if (isFromEdit) {
+      body['eventId'] = eventId;
+    }
+    List<String> imagesListData = [];
+    imagesListData.clear();
+    for (var element in imagesList) {
+      if (element.contains(GlobalVariable.bundel)) {
+        imagesListData.add(element);
+      }
+    }
+    print(imagesListData);
     EasyLoading.show(status: 'Loading');
-    var request = http.MultipartRequest("POST",
-        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.createEvent));
+    var request = http.MultipartRequest(
+        "POST",
+        Uri.parse(isFromEdit
+            ? GlobalVariable.baseUrl + GlobalVariable.editEvent
+            : GlobalVariable.baseUrl + GlobalVariable.createEvent));
     request.headers.addAll(await CommonFunctions().getHeader());
     request.fields.addAll(body);
     List<http.MultipartFile> files = [];
-    for(var element in imagesList) {
+    for (var element in imagesListData) {
       var multipartFile = await http.MultipartFile.fromPath('images', element);
       files.add(multipartFile);
     }
@@ -549,8 +620,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       if (res.code == 200) {
         Get.back();
         // Navigator.pop(ctx);
-        Fluttertoast.showToast(
-            msg: res.msg);
+        Fluttertoast.showToast(msg: res.msg);
         EasyLoading.dismiss();
         return;
       } else {
@@ -565,6 +635,63 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               error.toString().indexOf(':') + 1, error.toString().length),
           toastLength: Toast.LENGTH_SHORT);
       print(error);
+    }
+  }
+
+  Future createEventWithoutApi(BuildContext ctx) async {
+    Map<String, String> body = {
+      "event_name": controllerName.text.trim().toString(),
+      "categoryId": categoryId,
+      "location": locationController.text.trim().toString(),
+      "startDate": CommonFunctions()
+          .changeDateToServerFormat(controllerStartDate.text.trim().toString()),
+      "startTime": controllerStartTime.text.trim().toString(),
+      "endDate": CommonFunctions()
+          .changeDateToServerFormat(controllerEndDate.text.trim().toString()),
+      "endTime": controllerEndTime.text.trim().toString(),
+      "description": controllerDes.text.trim().toString(),
+      "lat": lat,
+      "lng": lng,
+      "eventId": eventId
+    };
+    print(imagesList);
+    EasyLoading.show(status: 'Loading');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
+    var response = await http.post(
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.editEvent),
+        headers: await CommonFunctions().getHeader(),
+        body: body);
+
+    // if (response.statusCode == 201) {}
+    print(response.body);
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+
+      if (res['code'] != 200 || res == null) {
+        String error = res['msg'];
+        // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
+        // Navigator.pop(ctx);
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+
+      Get.back();
+      // Navigator.pop(ctx);
+      Fluttertoast.showToast(msg: res['msg']);
+      EasyLoading.dismiss();
+    } catch (error) {
+      EasyLoading.dismiss();
+
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
     }
   }
 
@@ -586,37 +713,27 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     // if (response.statusCode == 201) {}
     print(response.body);
-    GetCategoriesResponse? result = null;
     try {
       Map<String, dynamic> res = json.decode(response.body);
 
-      result = GetCategoriesResponse.fromJson(res);
-      if (res['code'] != 200 || json == null) {
+      if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
         // Navigator.pop(ctx);
         print("scasd  " + error);
         throw new Exception(error);
       }
-
+      var result = GetCategoriesResponse.fromJson(res);
       EasyLoading.dismiss();
 
       return result;
     } catch (error) {
       EasyLoading.dismiss();
-      if (result != null) {
-        Fluttertoast.showToast(
-            msg: result.msg, toastLength: Toast.LENGTH_SHORT);
-        throw result.msg;
-      } else {
-        Fluttertoast.showToast(
-            msg: error.toString().substring(
-                error.toString().indexOf(':') + 1, error.toString().length),
-            toastLength: Toast.LENGTH_SHORT);
-        throw error.toString();
-      }
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
     }
   }
-
-
 }

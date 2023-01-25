@@ -6,11 +6,13 @@ import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+import '../../models/manager/event_listing_response.dart';
 import '../../util/common_funcations.dart';
 import '../../util/global_variable.dart';
 
@@ -257,79 +259,122 @@ class _BookingScreenState extends State<BookingScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                FutureBuilder(
+                FutureBuilder<EventListingResponse>(
                     future: eventListingApi(context, selectedFullDate),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return GridView.builder(
-                            shrinkWrap: true,
-                            primary: false,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisSpacing: 5,
-                              mainAxisSpacing: 5,
-                              crossAxisCount: 2,
-                              childAspectRatio:
-                                  MediaQuery.of(context).size.width /
+                        return snapshot.data!.body.isEmpty
+                            ? Center(
+                                child: AppText(
+                                text: "No event found",
+                                fontWeight: FontWeight.w500,
+                                textSize: 16,
+                              ))
+                            : GridView.builder(
+                                shrinkWrap: true,
+                                primary: false,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisSpacing: 5,
+                                  mainAxisSpacing: 5,
+                                  crossAxisCount: 2,
+                                  childAspectRatio: MediaQuery.of(context)
+                                          .size
+                                          .width /
                                       (MediaQuery.of(context).size.height / 3),
-                            ),
-                            itemCount: 6,
-                            itemBuilder: (context, index) {
-                              return InkWell(
-                                onTap: () {
-                                  Get.toNamed(Routes.bookingDetailScreen,
-                                      arguments: {"isFromCurrent": 'false'});
-                                },
-                                child: Stack(
-                                  children: [
-                                    Container(
-                                      height: 120,
-                                      width: Get.width,
-                                      foregroundDecoration: BoxDecoration(
-                                        color:
-                                            AppColor.blackColor.withAlpha(20),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image.asset(
-                                          'assets/images/ic_placeholder.png',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
+                                ),
+                                itemCount: snapshot.data!.body.length,
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    onTap: () async {
+                                      // Get.toNamed(Routes.bookingDetailScreen,
+                                      //     arguments: {"isFromCurrent": 'false'});
+                                      await Get.toNamed(
+                                          Routes.managerEventDetailScreen,
+                                          arguments: {
+                                            'eventId': snapshot
+                                                .data!.body[index].id
+                                                .toString()
+                                          });
+                                      setState(() {});
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                            height: 120,
+                                            width: Get.width,
+                                            foregroundDecoration: BoxDecoration(
+                                              color: AppColor.blackColor
+                                                  .withAlpha(20),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: CommonFunctions()
+                                                .setNetworkImages(
+                                              imageUrl: snapshot
+                                                      .data!
+                                                      .body[index]
+                                                      .eventImages
+                                                      .isEmpty
+                                                  ? ""
+                                                  : snapshot.data!.body[index]
+                                                      .eventImages[0].images,
+                                              circle: 20,
+                                              boxFit: BoxFit.cover,
+                                            )),
                                     Positioned.fill(
                                       child: Align(
                                         alignment: Alignment.bottomLeft,
                                         child: Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 15, vertical: 10),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              AppText(
-                                                text: "Event 0${index + 1}",
-                                                textSize: 15,
-                                                fontWeight: FontWeight.w400,
-                                                textColor: AppColor.whiteColor,
-                                              ),
+                                              margin: const EdgeInsets.only(
+                                                  left: 15,
+                                                  top: 10,
+                                                  bottom: 10,
+                                                  right: 8),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  AppText(
+                                                    text: snapshot
+                                                        .data!.body[index].name,
+                                                    textSize: 15,
+                                                    fontWeight: FontWeight.w400,
+                                                    textColor:
+                                                        AppColor.whiteColor,
+                                                  ),
                                               Row(children: [
-                                                Image.asset(
-                                                  'assets/images/ic_location_mark.png',
-                                                  height: 12,
-                                                  color: AppColor.whiteColor,
-                                                ),
-                                                AppText(
-                                                  text: " New York",
-                                                  textSize: 12,
-                                                  fontWeight: FontWeight.w400,
-                                                  textColor:
-                                                      AppColor.whiteColor,
-                                                ),
-                                              ])
+                                                    Image.asset(
+                                                      'assets/images/ic_location_mark.png',
+                                                      height: 12,
+                                                      color:
+                                                          AppColor.whiteColor,
+                                                    ),
+                                                    Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                left: 5.0),
+                                                        child: AppText(
+                                                          maxlines: 2,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          text: snapshot
+                                                              .data!
+                                                              .body[index]
+                                                              .location,
+                                                          textSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          textColor: AppColor
+                                                              .whiteColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ])
                                             ],
                                           ),
                                         ),
@@ -353,7 +398,8 @@ class _BookingScreenState extends State<BookingScreen> {
             )));
   }
 
-  Future<String> eventListingApi(BuildContext ctx, String date) async {
+  Future<EventListingResponse> eventListingApi(
+      BuildContext ctx, String date) async {
     var connectivityResult = await (Connectivity().checkConnectivity());
 
     if (!(connectivityResult == ConnectivityResult.mobile ||
@@ -380,9 +426,9 @@ class _BookingScreenState extends State<BookingScreen> {
         print("scasd  " + error);
         throw new Exception(error);
       }
-      // ManagerHomeResponse result = ManagerHomeResponse.fromJson(res);
+      EventListingResponse result = EventListingResponse.fromJson(res);
 
-      return '';
+      return result;
     } catch (error) {
       Fluttertoast.showToast(
           msg: error.toString().substring(

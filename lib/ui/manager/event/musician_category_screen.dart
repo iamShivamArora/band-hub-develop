@@ -23,6 +23,52 @@ class MusicianCategoryScreen extends StatefulWidget {
 }
 
 class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
+  var eventId = "";
+  TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    eventId = Get.arguments['eventId'] ?? "";
+    searchCall();
+    listingApi();
+    super.initState();
+  }
+
+  GetCategoriesResponse? resultData;
+  List<CategoriesBody> categoryList = [];
+
+  void searchCall() {
+    searchController.addListener(() {
+      if (categoryList.isNotEmpty) {
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (searchController.text.trim().toString().isNotEmpty) {
+            resultData!.body.clear();
+            resultData!.body.addAll(categoryList.where((i) => i.name
+                .toLowerCase()
+                .contains(
+                    searchController.text.trim().toString().toLowerCase())));
+            setState(() {});
+            print(searchController.text.trim().toString());
+          } else {
+            resultData!.body.clear();
+            resultData!.body.addAll(categoryList);
+            setState(() {});
+          }
+        });
+      }
+    });
+  }
+
+  void listingApi() async {
+    resultData = await categoryListApi(context);
+    categoryList.addAll(resultData!.body);
+    loading = false;
+    setState(() {});
+  }
+
+  var errorMsg = '';
+  var loading = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,6 +90,7 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
                           offset: const Offset(2, 2)),
                     ]),
                 child: SimpleTf(
+                    controller: searchController,
                     fillColor: AppColor.whiteColor,
                     titleVisibilty: false,
                     hint: 'Search by Categoies',
@@ -51,63 +98,84 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
             const SizedBox(
               height: 25,
             ),
-            FutureBuilder<GetCategoriesResponse>(
-                future: categoryListApi(context),
-                builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return GridView.builder(
-                    shrinkWrap: true,
-                    primary: false,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      crossAxisCount: 2,
-                      childAspectRatio: MediaQuery.of(context).size.width /
-                          (MediaQuery.of(context).size.height / 2.6),
-                    ),
-                    itemCount: snapshot.data!.body.length,
-                    itemBuilder: (context, index) {
-                      return Stack(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Get.toNamed(Routes.nearbyMusicianScreen,arguments: {
-                                'catId':snapshot.data!.body[index].id.toString()
-                              });
-                            },
-                            child: Container(
-                              height: Get.height,
-                              width: Get.width,
-                              foregroundDecoration: BoxDecoration(
-                                color: AppColor.blackColor.withAlpha(20),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  'assets/images/ic_placeholder.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+            errorMsg.isNotEmpty
+                ? Center(
+                    child: AppText(
+                    text: errorMsg,
+                    fontWeight: FontWeight.w500,
+                    textSize: 16,
+                  ))
+                : loading
+                    ? Center(child: CommonFunctions().loadingCircle())
+                    : resultData!.body.isEmpty
+                        ? Center(
+                            child: AppText(
+                            text: 'No Category Found',
+                            fontWeight: FontWeight.w500,
+                            textSize: 16,
+                          ))
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            primary: false,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              crossAxisCount: 2,
+                              childAspectRatio: MediaQuery.of(context)
+                                      .size
+                                      .width /
+                                  (MediaQuery.of(context).size.height / 2.6),
                             ),
-                          ),
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Container(
-                                margin: const EdgeInsets.all(10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AppText(
-                                      text: snapshot.data!.body[index].name,
-                                      textSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      textColor: AppColor.whiteColor,
+                            itemCount: resultData!.body.length,
+                            itemBuilder: (context, index) {
+                              return Stack(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      Get.toNamed(Routes.nearbyMusicianScreen,
+                                          arguments: {
+                                            'catId': resultData!.body[index].id
+                                                .toString(),
+                                            'eventId': eventId
+                                          });
+                                    },
+                                    child: Container(
+                                      height: Get.height,
+                                      width: Get.width,
+                                      foregroundDecoration: BoxDecoration(
+                                        color:
+                                            AppColor.blackColor.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Image.asset(
+                                          'assets/images/ic_placeholder.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
-                                    /*Row(children: [
+                                  ),
+                                  Positioned.fill(
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Container(
+                                        margin: const EdgeInsets.all(10),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            AppText(
+                                              text:
+                                                  resultData!.body[index].name,
+                                              textSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              textColor: AppColor.whiteColor,
+                                            ),
+                                            /*Row(children: [
                                       Image.asset(
                                         'assets/images/ic_location_mark.png',
                                         height: 12,
@@ -120,24 +188,14 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
                                         textColor: AppColor.whiteColor,
                                       ),
                                     ])*/
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    });
-              } else if (snapshot.hasError) {
-                return Center(
-                    child: AppText(
-                  text: snapshot.error.toString(),
-                  fontWeight: FontWeight.w500,
-                  textSize: 16,
-                ));
-              }
-              return Center(child: CommonFunctions().loadingCircle());
-            })
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              );
+                            })
           ]),
         ),
       ),
@@ -169,10 +227,13 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
 
       return result;
     } catch (error) {
+      errorMsg = error.toString().substring(
+          error.toString().indexOf(':') + 1, error.toString().length);
       Fluttertoast.showToast(
           msg: error.toString().substring(
               error.toString().indexOf(':') + 1, error.toString().length),
           toastLength: Toast.LENGTH_SHORT);
+      setState(() {});
       throw error.toString();
     }
   }

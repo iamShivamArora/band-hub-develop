@@ -60,6 +60,7 @@ class Body {
     required this.createdAt,
     required this.status,
     required this.updatedAt,
+    required this.categoryName,
     required this.ratingTo,
   });
 
@@ -93,6 +94,7 @@ class Body {
   late final String createdAt;
   late final int status;
   late final String updatedAt;
+  late final String categoryName;
   late final RatingTo ratingTo;
 
   Body.fromJson(Map<String, dynamic> json) {
@@ -126,6 +128,7 @@ class Body {
     createdAt = json['createdAt'];
     status = json['status'];
     updatedAt = json['updatedAt'];
+    categoryName = json['categoryName'];
     ratingTo = RatingTo.fromJson(json['ratingTo']);
   }
 
@@ -161,6 +164,7 @@ class Body {
     _data['createdAt'] = createdAt;
     _data['status'] = status;
     _data['updatedAt'] = updatedAt;
+    _data['categoryName'] = categoryName;
     _data['ratingTo'] = ratingTo.toJson();
     return _data;
   }

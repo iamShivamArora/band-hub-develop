@@ -5,16 +5,18 @@ class MusicianListingResponse {
     required this.msg,
     required this.body,
   });
+
   late final bool success;
   late final int code;
   late final String msg;
-  late final List<Body> body;
+  late final List<MusicianBody> body;
 
-  MusicianListingResponse.fromJson(Map<String, dynamic> json){
+  MusicianListingResponse.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     code = json['code'];
     msg = json['msg'];
-    body = List.from(json['body']).map((e)=>Body.fromJson(e)).toList();
+    body =
+        List.from(json['body']).map((e) => MusicianBody.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -27,8 +29,8 @@ class MusicianListingResponse {
   }
 }
 
-class Body {
-  Body({
+class MusicianBody {
+  MusicianBody({
     required this.id,
     required this.type,
     required this.fullName,
@@ -92,7 +94,7 @@ class Body {
   late final int status;
   late final String updatedAt;
 
-  Body.fromJson(Map<String, dynamic> json){
+  MusicianBody.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     type = json['type'];
     fullName = json['full_name'];

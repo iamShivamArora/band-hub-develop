@@ -26,10 +26,12 @@ class MusicianDetailScreen extends StatefulWidget {
 
 class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
   var userId = '';
+  var eventId = '';
 
   @override
   void initState() {
     userId = Get.arguments['userId'] ?? "";
+    eventId = Get.arguments['eventId'] ?? "";
     super.initState();
   }
 
@@ -70,7 +72,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                         height: 2,
                                       ),
                                       AppText(
-                                        text: 'category',
+                                        text: snapshot.data!.body.categoryName,
                                         textSize: 13,
                                         fontWeight: FontWeight.w400,
                                       ),
@@ -271,7 +273,9 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                             ),
                             ElevatedBtn(
                               text: ' Send Invitation ',
-                              onTap: () {},
+                              onTap: () {
+                                sendInviteToUser(context, userId);
+                              },
                             )
                           ],
                         ))
@@ -354,6 +358,45 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
 
       EasyLoading.dismiss();
       Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+      return res['code'] != 200;
+    } catch (error) {
+      EasyLoading.dismiss();
+
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
+    }
+  }
+
+  Future sendInviteToUser(BuildContext ctx, String userId) async {
+    Map<String, String> data = {'userId': userId, 'eventId': eventId};
+    EasyLoading.show(status: 'Loading');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
+    var response = await http.post(
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.inviteUsers),
+        headers: await CommonFunctions().getHeader(),
+        body: data);
+
+    print(response.body);
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+
+      if (res['code'] != 200 || res == null) {
+        String error = res['msg'];
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+
+      EasyLoading.dismiss();
+      Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+      Get.back();
       return res['code'] != 200;
     } catch (error) {
       EasyLoading.dismiss();

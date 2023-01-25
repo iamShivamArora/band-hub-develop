@@ -27,13 +27,53 @@ class NearbyMusicianScreen extends StatefulWidget {
 
 class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
   var catId = "";
+  var eventId = "";
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     catId = Get.arguments['catId'] ?? "";
+    eventId = Get.arguments['eventId'] ?? "";
 
+    searchCall();
+    listingApi();
     super.initState();
   }
+
+  MusicianListingResponse? resultData;
+  List<MusicianBody> musicianList = [];
+
+  void searchCall() {
+    searchController.addListener(() {
+      if (musicianList.isNotEmpty) {
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (searchController.text.trim().toString().isNotEmpty) {
+            resultData!.body.clear();
+            resultData!.body.addAll(musicianList.where((i) => i.fullName
+                .toLowerCase()
+                .contains(
+                    searchController.text.trim().toString().toLowerCase())));
+            setState(() {});
+            print(searchController.text.trim().toString());
+          } else {
+            resultData!.body.clear();
+            resultData!.body.addAll(musicianList);
+            setState(() {});
+          }
+        });
+      }
+    });
+  }
+
+  void listingApi() async {
+    resultData = await musicianListApi(context);
+    musicianList.addAll(resultData!.body);
+    loading = false;
+    setState(() {});
+  }
+
+  var errorMsg = '';
+  var loading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +97,7 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                               offset: const Offset(2, 2)),
                         ]),
                     child: SimpleTf(
+                        controller: searchController,
                         fillColor: AppColor.whiteColor,
                         titleVisibilty: false,
                         hint: 'Search',
@@ -64,30 +105,39 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                 const SizedBox(
                   height: 25,
                 ),
-                FutureBuilder<MusicianListingResponse>(
-                    future: musicianListApi(context),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return snapshot.data!.body.isEmpty
+                errorMsg.isNotEmpty
+                    ? Center(
+                        child: AppText(
+                        text: errorMsg,
+                        fontWeight: FontWeight.w500,
+                        textSize: 16,
+                      ))
+                    : loading
+                        ? Center(child: CommonFunctions().loadingCircle())
+                        : resultData!.body.isEmpty
                             ? Center(
-                            child: AppText(
-                              text: "No musician found",
-                              fontWeight: FontWeight.w500,
-                              textSize: 16,
-                            ))
+                                child: AppText(
+                                text: "No Musician Found",
+                                fontWeight: FontWeight.w500,
+                                textSize: 16,
+                              ))
                             : ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data!.body.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: ((context, index) {
-                              return InkWell(
-                                onTap: () => Get.toNamed(
-                                        Routes.musicianDetailScreen,
-                                        arguments: {
-                                          'userId': snapshot
-                                              .data!.body[index].id
-                                              .toString()
-                                        }),
+                                shrinkWrap: true,
+                                itemCount: resultData!.body.length,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemBuilder: ((context, index) {
+                                  return InkWell(
+                                    onTap: () async {
+                                      await Get.toNamed(
+                                          Routes.musicianDetailScreen,
+                                          arguments: {
+                                            'userId': resultData!.body[index].id
+                                                .toString(),
+                                            'eventId': eventId
+                                          });
+                                      listingApi();
+                                      setState(() {});
+                                    },
                                     child: Container(
                                       margin: const EdgeInsets.only(bottom: 15),
                                       padding: const EdgeInsets.symmetric(
@@ -98,110 +148,116 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                               BorderRadius.circular(15),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: AppColor.grayColor.withAlpha(40),
-                                          blurRadius: 10.0,
-                                          offset: const Offset(2, 2),
-                                        ),
-                                      ]),
-                                  child: Row(
-                                    children: [
-                                      CommonFunctions().setNetworkImages(
-                                        imageUrl: snapshot.data!.body[index].profileImage,
-                                        height: 65,width: 65
-                                      ),
-                                      const SizedBox(
-                                        width: 15,
-                                      ),
-                                      Expanded(
-                                          child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                              color: AppColor.grayColor
+                                                  .withAlpha(40),
+                                              blurRadius: 10.0,
+                                              offset: const Offset(2, 2),
+                                            ),
+                                          ]),
+                                      child: Row(
                                         children: [
-                                          AppText(
-                                            text: snapshot.data!.body[index].fullName,
-                                            textSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                          CommonFunctions().setNetworkImages(
+                                              imageUrl: resultData!
+                                                  .body[index].profileImage,
+                                              height: 65,
+                                              width: 65),
                                           const SizedBox(
-                                            height: 2,
+                                            width: 15,
                                           ),
-                                          Row(
+                                          Expanded(
+                                              child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
+                                              AppText(
+                                                text: resultData!
+                                                    .body[index].fullName,
+                                                textSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
                                               Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  Image.asset(
-                                                      'assets/images/ic_location_mark.png',
-                                                      height: 12),
-                                                  AppText(
-                                                    text: " ${index + 1} miles",
-                                                    textSize: 12,
-                                                    fontWeight: FontWeight.w400,
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                          'assets/images/ic_location_mark.png',
+                                                          height: 12),
+                                                      AppText(
+                                                        text:
+                                                            " ${index + 1} miles",
+                                                        textSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ],
+                                              )
+                                            ],
+                                          )),
+                                          Column(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  var success =
+                                                      await changeFavStatusApi(
+                                                          context,
+                                                          resultData!
+                                                              .body[index].id
+                                                              .toString(),
+                                                          //resultData!.body[index].isFav ? "2":
+                                                          "1");
+                                                  // if(success){
+                                                  //  resultData!.body[index].isFav = !snapshot.data!.body[index].isFav;
+                                                  // }
+                                                  setState(() {});
+                                                },
+                                                child: Image.asset(
+                                                  //resultData!.body[index].isFav?
+                                                  // 'assets/images/ic_red_heart.png':
+                                                  'assets/images/ic_gray_heart.png',
+                                                  height: 35,
+                                                ),
                                               ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  showDeclineDialog(
+                                                      resultData!
+                                                          .body[index].fullName,
+                                                      resultData!.body[index].id
+                                                          .toString());
+                                                },
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(5),
+                                                  decoration: BoxDecoration(
+                                                      color: AppColor.appColor,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5)),
+                                                  child: AppText(
+                                                    text: ' Send Invitation ',
+                                                    textSize: 8,
+                                                    textColor:
+                                                        AppColor.whiteColor,
+                                                  ),
+                                                ),
+                                              )
                                             ],
                                           )
                                         ],
-                                      )),
-                                      Column(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: ()async{
-                                            var success =  await changeFavStatusApi(context, snapshot.data!.body[index].id.toString(),
-                                                  // snapshot.data!.body[index].isFav ? "2":
-                                                  "1" );
-                                            // if(success){
-                                            //   snapshot.data!.body[index].isFav = !snapshot.data!.body[index].isFav;
-                                            // }
-                                            setState(() {});
-                                            },
-                                            child: Image.asset(
-                                              // snapshot.data!.body[index].isFav?
-                                              // 'assets/images/ic_red_heart.png':
-                                              'assets/images/ic_gray_heart.png',
-                                              height: 35,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          GestureDetector(
-                                            onTap: (){
-                                              showDeclineDialog(snapshot.data!.body[index].fullName);
-                                            },
-                                            child: Container(
-                                              padding: const EdgeInsets.all(5),
-                                              decoration: BoxDecoration(
-                                                  color: AppColor.appColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(5)),
-                                              child: AppText(
-                                                text: ' Send Invitation ',
-                                                textSize: 8,
-                                                textColor: AppColor.whiteColor,
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }));
-                      }
-                      else if (snapshot.hasError) {
-                        return Center(
-                            child: AppText(
-                              text: snapshot.error.toString(),
-                              fontWeight: FontWeight.w500,
-                              textSize: 16,
-                            ));
-                      }
-                      return Center(child: CommonFunctions().loadingCircle());
-                    })
+                                      ),
+                                    ),
+                                  );
+                                }))
               ]),
             )));
   }
@@ -234,10 +290,13 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
 
       return result;
     } catch (error) {
+      errorMsg = error.toString().substring(
+          error.toString().indexOf(':') + 1, error.toString().length);
       Fluttertoast.showToast(
           msg: error.toString().substring(
               error.toString().indexOf(':') + 1, error.toString().length),
           toastLength: Toast.LENGTH_SHORT);
+      setState(() {});
       throw error.toString();
     }
   }
@@ -283,18 +342,18 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
     }
   }
 
-  showDeclineDialog(String username) {
+  showDeclineDialog(String username, String userId) {
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (_) => Dialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0)),
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            padding:
-            const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-            decoration: BoxDecoration(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                decoration: BoxDecoration(
                 color: AppColor.whiteColor,
                 borderRadius: BorderRadius.circular(15)),
             child: Column(
@@ -336,13 +395,52 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                           textColor: AppColor.whiteColor,
                           onTap: () {
                             Get.back();
+                            sendInviteToUser(context, userId);
                           },
                         )),
+                      ],
+                    )
                   ],
-                )
-              ],
-            ),
-          ),
-        ));
+                ),
+              ),
+            ));
+  }
+
+  Future sendInviteToUser(BuildContext ctx, String userId) async {
+    Map<String, String> data = {'userId': userId, 'eventId': eventId};
+    EasyLoading.show(status: 'Loading');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
+    var response = await http.post(
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.inviteUsers),
+        headers: await CommonFunctions().getHeader(),
+        body: data);
+
+    print(response.body);
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+
+      if (res['code'] != 200 || res == null) {
+        String error = res['msg'];
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+
+      EasyLoading.dismiss();
+      Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+      return res['code'] != 200;
+    } catch (error) {
+      EasyLoading.dismiss();
+
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
+    }
   }
 }
