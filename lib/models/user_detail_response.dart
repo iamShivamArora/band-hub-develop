@@ -61,6 +61,7 @@ class Body {
     required this.status,
     required this.updatedAt,
     required this.categoryName,
+    required this.isFav,
     required this.ratingTo,
   });
 
@@ -95,6 +96,7 @@ class Body {
   late final int status;
   late final String updatedAt;
   late final String categoryName;
+  late final int isFav;
   late final RatingTo ratingTo;
 
   Body.fromJson(Map<String, dynamic> json) {
@@ -129,6 +131,7 @@ class Body {
     status = json['status'];
     updatedAt = json['updatedAt'];
     categoryName = json['categoryName'];
+    isFav = json['isFav'];
     ratingTo = RatingTo.fromJson(json['ratingTo']);
   }
 
@@ -165,6 +168,7 @@ class Body {
     _data['status'] = status;
     _data['updatedAt'] = updatedAt;
     _data['categoryName'] = categoryName;
+    _data['isFav'] = isFav;
     _data['ratingTo'] = ratingTo.toJson();
     return _data;
   }
@@ -183,14 +187,14 @@ class RatingTo {
     required this.user,
   });
 
-  late final int id;
-  late final int reviewBy;
-  late final int reviewTo;
-  late final int eventId;
-  late final int rating;
-  late final String message;
-  late final String createdAt;
-  late final String updatedAt;
+  late final int? id;
+  late final int? reviewBy;
+  late final int? reviewTo;
+  late final int? eventId;
+  late final int? rating;
+  late final String? message;
+  late final String? createdAt;
+  late final String? updatedAt;
   late final User user;
 
   RatingTo.fromJson(Map<String, dynamic> json) {
@@ -232,14 +236,14 @@ class User {
     required this.lng,
   });
 
-  late final int id;
-  late final String fullName;
-  late final String musicianName;
-  late final String profileImage;
-  late final int categoryId;
-  late final String location;
-  late final String lat;
-  late final String lng;
+  late final int? id;
+  late final String? fullName;
+  late final String? musicianName;
+  late final String? profileImage;
+  late final int? categoryId;
+  late final String? location;
+  late final String? lat;
+  late final String? lng;
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];

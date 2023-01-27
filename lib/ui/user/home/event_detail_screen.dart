@@ -8,10 +8,13 @@ import 'package:band_hub/widgets/elevated_stroke_btn.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 import '../../../models/event_detail_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
@@ -26,6 +29,8 @@ class EventDetailScreen extends StatefulWidget {
 class _EventDetailScreenState extends State<EventDetailScreen> {
   bool isFromManager = false;
   String eventId = "";
+  PageController controller =
+      PageController(viewportFraction: 1, keepPage: true);
 
   @override
   void initState() {
@@ -45,23 +50,48 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               return SingleChildScrollView(
                 child: Column(
                   children: [
-                    // snapshot.data!.body.eventImages.isEmpty ?
-                    Container(
-                      width: Get.width,
+                    SizedBox(
                       height: 260,
-                      decoration: BoxDecoration(
-                          color: AppColor.grayColor,
-                          image: const DecorationImage(
-                              image: AssetImage(
-                                  'assets/images/ic_placeholder.png'),
-                              fit: BoxFit.cover)),
+                      width: Get.width,
+                      child: Stack(children: [
+                        PageView.builder(
+                          itemCount: snapshot.data!.body.eventImages.length,
+                          controller: controller,
+                          onPageChanged: (value) {
+                            setState(() {});
+                          },
+                          itemBuilder: (BuildContext context, int itemIndex) {
+                            return CommonFunctions().setNetworkImages(
+                                imageUrl: snapshot
+                                    .data!.body.eventImages[itemIndex].images,
+                                height: 260,
+                                boxFit: BoxFit.cover,
+                                width: MediaQuery.of(Get.context!).size.width);
+                          },
+                        ),
+                        snapshot.data!.body.eventImages.length == 1
+                            ? Container()
+                            : Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  margin: const EdgeInsets.all(10),
+                                  child: SmoothPageIndicator(
+                                      controller: controller,
+                                      // PageController
+                                      count: snapshot
+                                          .data!.body.eventImages.length,
+                                      effect: ScrollingDotsEffect(
+                                          activeDotColor: AppColor.appColor,
+                                          dotColor: AppColor.grayColor
+                                              .withOpacity(.50),
+                                          spacing: 5,
+                                          dotHeight: 7,
+                                          dotWidth: 7),
+                                      // your preferred effect
+                                      onDotClicked: (index) {}),
+                                )),
+                      ]),
                     ),
-                    // : CommonFunctions().setNetworkImages(
-                    //     imageUrl: snapshot
-                    //         .data!.body.eventImages[0].event.image,
-                    //     width: Get.width,
-                    //     height: 200,
-                    //     circle: 15),
                     Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -344,17 +374,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                                             const EdgeInsets
                                                                     .only(
                                                                 left: 5.0),
-                                                        child: AppText(
-                                                          text: snapshot
-                                                              .data!
-                                                              .body
-                                                              .eventBookings[
-                                                                  index]
-                                                              .user
-                                                              .location,
-                                                          textSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w400,
+                                                        child: Expanded(
+                                                          child: AppText(
+                                                            text: snapshot
+                                                                .data!
+                                                                .body
+                                                                .eventBookings[
+                                                                    index]
+                                                                .user
+                                                                .location,
+                                                            textSize: 12,
+                                                            maxlines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
                                                         ),
                                                       ),
                                                     ],
@@ -530,7 +566,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);

@@ -261,7 +261,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         print("scasd  " + error);

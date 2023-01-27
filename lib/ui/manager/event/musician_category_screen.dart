@@ -78,125 +78,130 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => FocusScope.of(context).requestFocus(FocusScopeNode()),
-          child: Column(children: [
-            Container(
-                decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                          color: AppColor.grayColor.withAlpha(40),
-                          blurRadius: 10.0,
-                          offset: const Offset(2, 2)),
-                    ]),
-                child: SimpleTf(
-                    controller: searchController,
-                    fillColor: AppColor.whiteColor,
-                    titleVisibilty: false,
-                    hint: 'Search by Categoies',
-                    suffix: "assets/images/ic_search_black.png")),
-            const SizedBox(
-              height: 25,
-            ),
-            errorMsg.isNotEmpty
-                ? Center(
-                    child: AppText(
-                    text: errorMsg,
-                    fontWeight: FontWeight.w500,
-                    textSize: 16,
-                  ))
-                : loading
-                    ? Center(child: CommonFunctions().loadingCircle())
-                    : resultData!.body.isEmpty
-                        ? Center(
-                            child: AppText(
-                            text: 'No Category Found',
-                            fontWeight: FontWeight.w500,
-                            textSize: 16,
-                          ))
-                        : GridView.builder(
-                            shrinkWrap: true,
-                            primary: false,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              crossAxisCount: 2,
-                              childAspectRatio: MediaQuery.of(context)
-                                      .size
-                                      .width /
-                                  (MediaQuery.of(context).size.height / 2.6),
-                            ),
-                            itemCount: resultData!.body.length,
-                            itemBuilder: (context, index) {
-                              return Stack(
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      Get.toNamed(Routes.nearbyMusicianScreen,
-                                          arguments: {
-                                            'catId': resultData!.body[index].id
-                                                .toString(),
-                                            'eventId': eventId
-                                          });
-                                    },
-                                    child: Container(
-                                      height: Get.height,
-                                      width: Get.width,
-                                      foregroundDecoration: BoxDecoration(
-                                        color:
-                                            AppColor.blackColor.withAlpha(20),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image.asset(
-                                          'assets/images/ic_placeholder.png',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned.fill(
-                                    child: Align(
-                                      alignment: Alignment.bottomLeft,
+          child: SingleChildScrollView(
+            child: Column(children: [
+              Container(
+                  decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                            color: AppColor.grayColor.withAlpha(40),
+                            blurRadius: 10.0,
+                            offset: const Offset(2, 2)),
+                      ]),
+                  child: SimpleTf(
+                      controller: searchController,
+                      fillColor: AppColor.whiteColor,
+                      titleVisibilty: false,
+                      hint: 'Search by Categoies',
+                      suffix: "assets/images/ic_search_black.png")),
+              const SizedBox(
+                height: 25,
+              ),
+              errorMsg.isNotEmpty
+                  ? Center(
+                      child: AppText(
+                      text: errorMsg,
+                      fontWeight: FontWeight.w500,
+                      textSize: 16,
+                    ))
+                  : loading
+                      ? Center(child: CommonFunctions().loadingCircle())
+                      : resultData!.body.isEmpty
+                          ? Center(
+                              child: AppText(
+                              text: 'No Category Found',
+                              fontWeight: FontWeight.w500,
+                              textSize: 16,
+                            ))
+                          : GridView.builder(
+                              shrinkWrap: true,
+                              primary: false,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                crossAxisCount: 2,
+                                childAspectRatio: MediaQuery.of(context)
+                                        .size
+                                        .width /
+                                    (MediaQuery.of(context).size.height / 2.6),
+                              ),
+                              itemCount: resultData!.body.length,
+                              itemBuilder: (context, index) {
+                                return Stack(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        Get.toNamed(Routes.nearbyMusicianScreen,
+                                            arguments: {
+                                              'catId': resultData!
+                                                  .body[index].id
+                                                  .toString(),
+                                              'eventId': eventId
+                                            });
+                                      },
                                       child: Container(
-                                        margin: const EdgeInsets.all(10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            AppText(
-                                              text:
-                                                  resultData!.body[index].name,
-                                              textSize: 15,
-                                              fontWeight: FontWeight.w600,
-                                              textColor: AppColor.whiteColor,
-                                            ),
-                                            /*Row(children: [
-                                      Image.asset(
-                                        'assets/images/ic_location_mark.png',
-                                        height: 12,
-                                        color: AppColor.whiteColor,
-                                      ),
-                                      AppText(
-                                        text: " New York",
-                                        textSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        textColor: AppColor.whiteColor,
-                                      ),
-                                    ])*/
-                                          ],
+                                        height: Get.height,
+                                        width: Get.width,
+                                        foregroundDecoration: BoxDecoration(
+                                          color:
+                                              AppColor.blackColor.withAlpha(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          child: Image.asset(
+                                            'assets/images/ic_placeholder.png',
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  )
-                                ],
-                              );
-                            })
-          ]),
+                                    Positioned.fill(
+                                      child: Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child: Container(
+                                          margin: const EdgeInsets.all(10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              AppText(
+                                                text: resultData!
+                                                    .body[index].name,
+                                                textSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                textColor: AppColor.whiteColor,
+                                              ),
+                                              /*Row(children: [
+                                        Image.asset(
+                                          'assets/images/ic_location_mark.png',
+                                          height: 12,
+                                          color: AppColor.whiteColor,
+                                        ),
+                                        AppText(
+                                          text: " New York",
+                                          textSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          textColor: AppColor.whiteColor,
+                                        ),
+                                      ])*/
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              })
+            ]),
+          ),
         ),
       ),
     );
@@ -210,13 +215,13 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
       throw new Exception('NO INTERNET CONNECTION');
     }
     var response = await http.get(
-        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getCategories),
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getUserCategories),
         headers: await CommonFunctions().getHeader());
 
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
 

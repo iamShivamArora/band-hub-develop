@@ -15,8 +15,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../../models/get_categories_response.dart';
-import '../../models/auth/login_response_model.dart';
 import '../../util/common_funcations.dart';
 import '../../util/global_variable.dart';
 import '../../util/sharedPref.dart';
@@ -476,7 +476,7 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
       throw new Exception('NO INTERNET CONNECTION');
     }
     var response = await http.get(
-        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getCategories),
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getUserCategories),
         headers: await CommonFunctions().getHeader());
 
     // if (response.statusCode == 201) {}

@@ -50,6 +50,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                         imageUrl: snapshot.data!.body.profileImage,
                         width: Get.width,
                         height: 260,
+                        isUser: true,
                         boxFit: BoxFit.cover),
                     Padding(
                         padding: const EdgeInsets.all(20),
@@ -112,14 +113,27 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                   width: 10,
                                 ),
                                 GestureDetector(
-                                  onTap: () {
-                                    changeFavStatusApi(context,
-                                        snapshot.data!.body.id.toString(), "1");
+                                  onTap: () async {
+                                    var success = await changeFavStatusApi(
+                                        context,
+                                        snapshot.data!.body.id.toString(),
+                                        snapshot.data!.body.isFav == 0
+                                            ? "1"
+                                            : "2");
+
+                                    if (success) {
+                                      setState(() {});
+                                    }
                                   },
-                                  child: Image.asset(
-                                    'assets/images/ic_gray_heart.png',
-                                    height: 35,
-                                  ),
+                                  child: snapshot.data!.body.isFav == 0
+                                      ? Image.asset(
+                                          'assets/images/ic_gray_heart.png',
+                                          height: 35,
+                                        )
+                                      : Image.asset(
+                                          'assets/images/ic_red_heart.png',
+                                          height: 35,
+                                        ),
                                 )
                               ],
                             ),
@@ -163,109 +177,120 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                     onTap: () {
                                       // Get.toNamed(Routes.musicianDetailScreen);
                                     },
-                                    child: Container(
-                                      margin: const EdgeInsets.only(bottom: 15),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 15, vertical: 10),
-                                      decoration: BoxDecoration(
-                                          color: AppColor.whiteColor,
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppColor.grayColor
-                                                  .withAlpha(80),
-                                              blurRadius: 10.0,
-                                              offset: const Offset(2, 2),
-                                            ),
-                                          ]),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              CommonFunctions()
-                                                  .setNetworkImages(
-                                                      imageUrl: snapshot
-                                                          .data!
-                                                          .body
-                                                          .ratingTo
-                                                          .user
-                                                          .profileImage,
-                                                      height: 65,
-                                                      width: 65,
-                                                      circle: 40,
-                                                      isUser: true),
-                                              const SizedBox(
-                                                width: 15,
-                                              ),
-                                              Expanded(
-                                                  child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Expanded(
-                                                        child: AppText(
-                                                          text: snapshot
+                                    child: snapshot.data!.body.ratingTo.id ==
+                                            null
+                                        ? Container()
+                                        : Container(
+                                            margin: const EdgeInsets.only(
+                                                bottom: 15),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 15, vertical: 10),
+                                            decoration: BoxDecoration(
+                                                color: AppColor.whiteColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: AppColor.grayColor
+                                                        .withAlpha(80),
+                                                    blurRadius: 10.0,
+                                                    offset: const Offset(2, 2),
+                                                  ),
+                                                ]),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    CommonFunctions()
+                                                        .setNetworkImages(
+                                                            imageUrl: snapshot
+                                                                .data!
+                                                                .body
+                                                                .ratingTo
+                                                                .user
+                                                                .profileImage!,
+                                                            height: 65,
+                                                            width: 65,
+                                                            circle: 40,
+                                                            isUser: true),
+                                                    const SizedBox(
+                                                      width: 15,
+                                                    ),
+                                                    Expanded(
+                                                        child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Expanded(
+                                                              child: AppText(
+                                                                text: snapshot
+                                                                    .data!
+                                                                    .body
+                                                                    .ratingTo
+                                                                    .user
+                                                                    .fullName!,
+                                                                textSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                            ),
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      left:
+                                                                          5.0),
+                                                              child: AppText(
+                                                                  text: CommonFunctions()
+                                                                      .timeAgoFormat(snapshot
+                                                                          .data!
+                                                                          .body
+                                                                          .ratingTo
+                                                                          .createdAt!),
+                                                                  textSize: 10),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 2,
+                                                        ),
+                                                        SmoothStarRating(
+                                                          allowHalfRating:
+                                                              false,
+                                                          starCount: 5,
+                                                          rating: snapshot
                                                               .data!
                                                               .body
                                                               .ratingTo
-                                                              .user
-                                                              .fullName,
-                                                          textSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w600,
+                                                              .rating!
+                                                              .toDouble(),
+                                                          size: 15.0,
+                                                          color: Colors.amber,
+                                                          borderColor:
+                                                              Colors.amber,
                                                         ),
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .only(
-                                                                left: 5.0),
-                                                        child: AppText(
-                                                            text: CommonFunctions()
-                                                                .timeAgoFormat(
-                                                                    snapshot
-                                                                        .data!
-                                                                        .body
-                                                                        .ratingTo
-                                                                        .createdAt),
-                                                            textSize: 10),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 2,
-                                                  ),
-                                                  SmoothStarRating(
-                                                    allowHalfRating: false,
-                                                    starCount: 5,
-                                                    rating: snapshot.data!.body
-                                                        .ratingTo.rating
-                                                        .toDouble(),
-                                                    size: 15.0,
-                                                    color: Colors.amber,
-                                                    borderColor: Colors.amber,
-                                                  ),
-                                                ],
-                                              ))
-                                            ],
+                                                      ],
+                                                    ))
+                                                  ],
+                                                ),
+                                                AppText(
+                                                  text: snapshot.data!.body
+                                                      .ratingTo.message!,
+                                                  textSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          AppText(
-                                            text: snapshot
-                                                .data!.body.ratingTo.message,
-                                            textSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   );
                                 })),
                             const SizedBox(
@@ -349,7 +374,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         print("scasd  " + error);
@@ -358,7 +383,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
 
       EasyLoading.dismiss();
       Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
-      return res['code'] != 200;
+      return res['code'] == 200;
     } catch (error) {
       EasyLoading.dismiss();
 

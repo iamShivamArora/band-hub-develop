@@ -85,180 +85,186 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
               behavior: HitTestBehavior.translucent,
               onTap: () =>
                   FocusScope.of(context).requestFocus(FocusScopeNode()),
-              child: Column(children: [
-                Container(
-                    decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                              color: AppColor.grayColor.withAlpha(40),
-                              blurRadius: 10.0,
-                              offset: const Offset(2, 2)),
-                        ]),
-                    child: SimpleTf(
-                        controller: searchController,
-                        fillColor: AppColor.whiteColor,
-                        titleVisibilty: false,
-                        hint: 'Search',
-                        suffix: "assets/images/ic_search_black.png")),
-                const SizedBox(
-                  height: 25,
-                ),
-                errorMsg.isNotEmpty
-                    ? Center(
-                        child: AppText(
-                        text: errorMsg,
-                        fontWeight: FontWeight.w500,
-                        textSize: 16,
-                      ))
-                    : loading
-                        ? Center(child: CommonFunctions().loadingCircle())
-                        : resultData!.body.isEmpty
-                            ? Center(
-                                child: AppText(
-                                text: "No Musician Found",
-                                fontWeight: FontWeight.w500,
-                                textSize: 16,
-                              ))
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: resultData!.body.length,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: ((context, index) {
-                                  return InkWell(
-                                    onTap: () async {
-                                      await Get.toNamed(
-                                          Routes.musicianDetailScreen,
-                                          arguments: {
-                                            'userId': resultData!.body[index].id
-                                                .toString(),
-                                            'eventId': eventId
-                                          });
-                                      listingApi();
-                                      setState(() {});
-                                    },
-                                    child: Container(
-                                      margin: const EdgeInsets.only(bottom: 15),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 15, vertical: 10),
-                                      decoration: BoxDecoration(
-                                          color: AppColor.whiteColor,
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppColor.grayColor
-                                                  .withAlpha(40),
-                                              blurRadius: 10.0,
-                                              offset: const Offset(2, 2),
+              child: SingleChildScrollView(
+                child: Column(children: [
+                  Container(
+                      decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                                color: AppColor.grayColor.withAlpha(40),
+                                blurRadius: 10.0,
+                                offset: const Offset(2, 2)),
+                          ]),
+                      child: SimpleTf(
+                          controller: searchController,
+                          fillColor: AppColor.whiteColor,
+                          titleVisibilty: false,
+                          hint: 'Search',
+                          suffix: "assets/images/ic_search_black.png")),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  errorMsg.isNotEmpty
+                      ? Center(
+                          child: AppText(
+                          text: errorMsg,
+                          fontWeight: FontWeight.w500,
+                          textSize: 16,
+                        ))
+                      : loading
+                          ? Center(child: CommonFunctions().loadingCircle())
+                          : resultData!.body.isEmpty
+                              ? Center(
+                                  child: AppText(
+                                  text: "No Musician Found",
+                                  fontWeight: FontWeight.w500,
+                                  textSize: 16,
+                                ))
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: resultData!.body.length,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder: ((context, index) {
+                                    return InkWell(
+                                      onTap: () async {
+                                        await Get.toNamed(
+                                            Routes.musicianDetailScreen,
+                                            arguments: {
+                                              'userId': resultData!
+                                                  .body[index].id
+                                                  .toString(),
+                                              'eventId': eventId
+                                            });
+                                        listingApi();
+                                        setState(() {});
+                                      },
+                                      child: Container(
+                                        margin:
+                                            const EdgeInsets.only(bottom: 15),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15, vertical: 10),
+                                        decoration: BoxDecoration(
+                                            color: AppColor.whiteColor,
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: AppColor.grayColor
+                                                    .withAlpha(40),
+                                                blurRadius: 10.0,
+                                                offset: const Offset(2, 2),
+                                              ),
+                                            ]),
+                                        child: Row(
+                                          children: [
+                                            CommonFunctions().setNetworkImages(
+                                                imageUrl: resultData!
+                                                    .body[index].profileImage,
+                                                height: 65,
+                                                width: 65),
+                                            const SizedBox(
+                                              width: 15,
                                             ),
-                                          ]),
-                                      child: Row(
-                                        children: [
-                                          CommonFunctions().setNetworkImages(
-                                              imageUrl: resultData!
-                                                  .body[index].profileImage,
-                                              height: 65,
-                                              width: 65),
-                                          const SizedBox(
-                                            width: 15,
-                                          ),
-                                          Expanded(
-                                              child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              AppText(
-                                                text: resultData!
-                                                    .body[index].fullName,
-                                                textSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                              const SizedBox(
-                                                height: 2,
-                                              ),
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Image.asset(
-                                                          'assets/images/ic_location_mark.png',
-                                                          height: 12),
-                                                      AppText(
-                                                        text:
-                                                            " ${index + 1} miles",
-                                                        textSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          )),
-                                          Column(
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () async {
-                                                  var success =
-                                                      await changeFavStatusApi(
-                                                          context,
-                                                          resultData!
-                                                              .body[index].id
-                                                              .toString(),
-                                                          //resultData!.body[index].isFav ? "2":
-                                                          "1");
-                                                  // if(success){
-                                                  //  resultData!.body[index].isFav = !snapshot.data!.body[index].isFav;
-                                                  // }
-                                                  setState(() {});
-                                                },
-                                                child: Image.asset(
-                                                  //resultData!.body[index].isFav?
-                                                  // 'assets/images/ic_red_heart.png':
-                                                  'assets/images/ic_gray_heart.png',
-                                                  height: 35,
+                                            Expanded(
+                                                child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                AppText(
+                                                  text: resultData!
+                                                      .body[index].fullName,
+                                                  textSize: 14,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              GestureDetector(
-                                                onTap: () {
-                                                  showDeclineDialog(
-                                                      resultData!
-                                                          .body[index].fullName,
-                                                      resultData!.body[index].id
-                                                          .toString());
-                                                },
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.all(5),
-                                                  decoration: BoxDecoration(
-                                                      color: AppColor.appColor,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5)),
-                                                  child: AppText(
-                                                    text: ' Send Invitation ',
-                                                    textSize: 8,
-                                                    textColor:
-                                                        AppColor.whiteColor,
+                                                const SizedBox(
+                                                  height: 2,
+                                                ),
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Image.asset(
+                                                            'assets/images/ic_location_mark.png',
+                                                            height: 12),
+                                                        AppText(
+                                                          text:
+                                                              " ${index + 1} miles",
+                                                          textSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            )),
+                                            Column(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    var success =
+                                                        await changeFavStatusApi(
+                                                            context,
+                                                            resultData!
+                                                                .body[index].id
+                                                                .toString(),
+                                                            //resultData!.body[index].isFav ? "2":
+                                                            "1");
+                                                    // if(success){
+                                                    //  resultData!.body[index].isFav = !snapshot.data!.body[index].isFav;
+                                                    // }
+                                                    setState(() {});
+                                                  },
+                                                  child: Image.asset(
+                                                    //resultData!.body[index].isFav?
+                                                    // 'assets/images/ic_red_heart.png':
+                                                    'assets/images/ic_gray_heart.png',
+                                                    height: 35,
                                                   ),
                                                 ),
-                                              )
-                                            ],
-                                          )
-                                        ],
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    showDeclineDialog(
+                                                        resultData!.body[index]
+                                                            .fullName,
+                                                        resultData!
+                                                            .body[index].id
+                                                            .toString());
+                                                  },
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(5),
+                                                    decoration: BoxDecoration(
+                                                        color:
+                                                            AppColor.appColor,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5)),
+                                                    child: AppText(
+                                                      text: ' Send Invitation ',
+                                                      textSize: 8,
+                                                      textColor:
+                                                          AppColor.whiteColor,
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }))
-              ]),
+                                    );
+                                  }))
+                ]),
+              ),
             )));
   }
 

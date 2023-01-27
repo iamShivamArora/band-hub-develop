@@ -708,7 +708,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       throw new Exception('NO INTERNET CONNECTION');
     }
     var response = await http.get(
-        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getCategories),
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getManagerCategories),
         headers: await CommonFunctions().getHeader());
 
     // if (response.statusCode == 201) {}

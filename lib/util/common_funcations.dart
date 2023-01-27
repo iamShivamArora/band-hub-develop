@@ -1,6 +1,8 @@
+import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/util/sharedPref.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:intl/intl.dart';
 
@@ -37,6 +39,14 @@ class CommonFunctions {
     DateTime tempDate = new DateFormat("yyyy-MM-dd").parse(savedDateString);
     String date = DateFormat("dd.MM.yyyy").format(tempDate);
     return date;
+  }
+
+  void invalideAuth(res) {
+    if (res['code'] == 403) {
+      String error = res['msg'];
+      Get.toNamed(Routes.logInScreen);
+      throw new Exception(error);
+    }
   }
 
   String changeServerDateDisplayFormat(String savedDateString) {
@@ -140,12 +150,12 @@ class CommonFunctions {
 
   String timeAgoFormat(String savedDateString) {
     DateTime tempDate =
-        new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(savedDateString);
+    new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(savedDateString);
     String date = DateFormat("dd-MM-yyyy hh:mm a").format(tempDate);
 
     // print(date);
     var dateTimeDuration =
-        DateTime.now().difference(DateTime.parse(savedDateString));
+    DateTime.now().difference(DateTime.parse(savedDateString));
     // var duration = Duration(minutes: 12);
     // print(DateTime.now().difference(DateTime.parse(savedDateString)));
     // print(DateTime.now().difference(DateTime.now().subtract(Duration(minutes: 12))));
@@ -153,19 +163,20 @@ class CommonFunctions {
     return GetTimeAgo.parse(DateTime.now().subtract(dateTimeDuration));
   }
 
-  Widget setNetworkImages(
-      {String imageUrl = "",
-      double circle = 0.0,
-      double width = 0.0,
-      double height = 0.0,
-      bool isUser = false,
-      BoxFit boxFit = BoxFit.cover}) {
+  Widget setNetworkImages({String imageUrl = "",
+    double circle = 0.0,
+    double width = 0.0,
+    double height = 0.0,
+    bool isUser = false,
+    BoxFit boxFit = BoxFit.cover}) {
     return ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(circle)),
         child: Image.network(
           imageUrl.contains(GlobalVariable.imageUrl)
               ? imageUrl
-              : GlobalVariable.imageUrl + imageUrl,
+              : isUser
+                  ? GlobalVariable.imageUserUrl + imageUrl
+                  : GlobalVariable.imageUrl + imageUrl,
           width: width,
           height: height,
           fit: boxFit,
@@ -183,7 +194,7 @@ class CommonFunctions {
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColor.appColor),
+                    AlwaysStoppedAnimation<Color>(AppColor.appColor),
                   ),
                 ),
               );
@@ -196,7 +207,9 @@ class CommonFunctions {
                 color: AppColor.grayColor,
                 child: Image.asset(
                     isUser
-                        ? "assets/images/ic_user.png"
+                        ? height < width
+                            ? "assets/images/error_image.png"
+                            : "assets/images/ic_user.png"
                         : "assets/images/error_image.png",
                     width: width,
                     height: height,

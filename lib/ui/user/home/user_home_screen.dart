@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:band_hub/models/auth/login_response_model.dart';
-import 'package:band_hub/models/success_response.dart';
 import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/util/sharedPref.dart';
 import 'package:band_hub/widgets/app_color.dart';
@@ -13,11 +12,12 @@ import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
+
 import '../../../models/user/event_requests_listing_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
@@ -185,14 +185,22 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                             Image.asset(
                                                 'assets/images/ic_location_mark.png',
                                                 height: 12),
-                                            AppText(
-                                              text: " " +
-                                                  snapshot.data!.body[index]
-                                                      .event.location,
-                                              textSize: 12,
-                                              fontWeight: FontWeight.w500,
+                                            Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0),
+                                                child: AppText(
+                                                  text: " " +
+                                                      snapshot.data!.body[index]
+                                                          .event.location,
+                                                  maxlines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  textSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
                                             ),
-                                            const Spacer(),
                                             AppText(
                                               text: CommonFunctions()
                                                       .changeDateFormat(snapshot
@@ -362,7 +370,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
@@ -413,7 +421,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);

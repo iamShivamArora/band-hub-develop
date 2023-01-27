@@ -531,7 +531,7 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
@@ -912,11 +912,7 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-      if (res['code'] == 403) {
-        String error = res['msg'];
-        Get.toNamed(Routes.logInScreen);
-        throw new Exception(error);
-      }
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         print("scasd  " + error);
@@ -951,11 +947,7 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
     print(response.body);
     try {
       Map<String, dynamic> res = json.decode(response.body);
-      if (res['code'] == 403) {
-        String error = res['msg'];
-        Get.toNamed(Routes.logInScreen);
-        throw new Exception(error);
-      }
+      CommonFunctions().invalideAuth(res);
       if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
