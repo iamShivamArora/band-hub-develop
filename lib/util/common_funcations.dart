@@ -70,7 +70,7 @@ class CommonFunctions {
         }
       case 1:
         {
-          return 'Accept';
+          return 'Accepted';
         }
       case 2:
         {
@@ -95,7 +95,59 @@ class CommonFunctions {
     }
   }
 
+  String getEventStatusType(int status) {
+    //	0=Pending ,1= Accept ,2= decline,3= ongoing ,4 = complete,5 = Cancel booking
+    switch (status) {
+      case 0:
+        {
+          return 'Upcoming';
+        }
+      case 1:
+        {
+          return 'Ongoing';
+        }
+      case 2:
+        {
+          return 'Complete';
+        }
+      case 3:
+        {
+          return 'Expiried';
+        }
+      default:
+        {
+          return '';
+        }
+    }
+  }
+
   Color getColorForStatus(int status) {
+    //	0=Pending ,1= Accept ,2= decline,3= ongoing ,4 = complete,5 = Cancel booking
+    switch (status) {
+      case 0:
+        {
+          return Colors.black;
+        }
+      case 1:
+        {
+          return Colors.amber;
+        }
+      case 2:
+        {
+          return Colors.green;
+        }
+      case 3:
+        {
+          return Colors.red;
+        }
+      default:
+        {
+          return Colors.black;
+        }
+    }
+  }
+
+  Color getUserStatusColor(int status) {
     //	0=Pending ,1= Accept ,2= decline,3= ongoing ,4 = complete,5 = Cancel booking
     switch (status) {
       case 0:
@@ -128,7 +180,6 @@ class CommonFunctions {
         }
     }
   }
-
   String zeroBeforeIfNeeded(String value) {
     if (value.length == 1) {
       return '0' + value;

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:band_hub/models/success_response.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/custom_phone_text_field.dart';
@@ -39,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController controllerAbout = TextEditingController();
   TextEditingController controllerNumber = TextEditingController();
   String countryCode = "";
-  Country selectedCountryIsoName = Country.IN;
+  Country selectedCountryIsoName = Country.US;
   String imageFile = "";
   bool isEditProfile = false;
   bool gotData = false;
@@ -157,6 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     SimpleTf(
                                       controller: controllerName,
                                       title: 'Full Name',
+                                      maxLength: 25,
                                       height: 45,
                                     ),
                                     const SizedBox(
@@ -177,6 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       height: 15,
                                     ),
                                     SimpleTf(
+                                      editabled: false,
                                       controller: controllerEmail,
                                       title: 'Email',
                                       height: 45,
@@ -468,7 +469,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "full_name": controllerName.text.trim().toString(),
       "email": controllerEmail.text.trim().toString(),
       "phone": controllerNumber.text.trim().toString(),
-      "description": controllerAbout.text.trim().toString(),
+      "about": controllerAbout.text.trim().toString(),
       "countryCode": countryCode,
     };
     print(body);
@@ -521,9 +522,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "description": controllerAbout.text.trim().toString(),
       "countryCode": countryCode,
     };
-    print(body);
+    print("request body : " + body.toString());
     EasyLoading.show(status: 'Loading');
-    var request = new http.MultipartRequest(
+    var request = http.MultipartRequest(
         "POST", Uri.parse(GlobalVariable.baseUrl + GlobalVariable.editProfile));
     request.headers.addAll(await CommonFunctions().getHeader());
     request.fields.addAll(body);
@@ -537,8 +538,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       var result = await response.stream.bytesToString();
       print(result);
-      var res = SuccessResponse.fromJson(json.decode(result));
-      if (res.code == 200) {
+      var res = json.decode(result);
+      if (res['code'] == 200) {
         // Navigator.pop(ctx);
         EasyLoading.dismiss();
         if (time == 0) {
@@ -546,7 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isEditProfile = false;
           getProfileApi(ctx);
           setState(() {});
-          Fluttertoast.showToast(msg: res.msg);
+          Fluttertoast.showToast(msg: res['msg']);
           time = time + 1;
           print("sucasdsadsadasdasdascccccc");
         } else {
@@ -557,7 +558,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         EasyLoading.dismiss();
         // Navigator.pop(ctx);
-        throw new Exception(res.msg);
+        throw new Exception(res['msg']);
       }
     } catch (error) {
       EasyLoading.dismiss();
@@ -571,8 +572,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void getCountryIso(String code) {
     for (var element in Country.ALL) {
-      if (code.contains(element.dialingCode)) {
+      if (code == "+" + element.dialingCode) {
         selectedCountryIsoName = element;
+        print(element.name);
       }
     }
   }

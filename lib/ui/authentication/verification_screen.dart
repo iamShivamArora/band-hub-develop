@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../models/auth/login_response_model.dart';
@@ -16,7 +17,6 @@ import '../../widgets/app_color.dart';
 import '../../widgets/app_text.dart';
 import '../../widgets/elevated_btn.dart';
 import '../../widgets/helper_widget.dart';
-import 'package:http/http.dart' as http;
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({Key? key}) : super(key: key);
@@ -28,7 +28,7 @@ class VerificationScreen extends StatefulWidget {
 class _VerificationScreenState extends State<VerificationScreen> {
   final controllerNumber = TextEditingController();
   final controllerEmail = TextEditingController();
-
+  var otpLength = 4;
   bool isFromLogin = false;
   bool isFromUser = false;
   String number = "";
@@ -85,7 +85,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       controller: controllerNumber,
                       appContext: context,
                       onChanged: (value) {},
-                      length: 4,
+                      length: otpLength,
                       animationType: AnimationType.fade,
                       keyboardType: TextInputType.number,
                       pinTheme: PinTheme(
@@ -120,20 +120,20 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         vertical: 10, horizontal: 40),
                     child: PinCodeTextField(
                       controller: controllerEmail,
-                      appContext: context,
-                      onChanged: (value) {},
-                      length: 4,
-                      animationType: AnimationType.fade,
-                      keyboardType: TextInputType.number,
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(10),
-                        fieldHeight: 42,
-                        fieldWidth: 42,
-                        borderWidth: 1,
-                        activeFillColor: AppColor.appColor,
-                        activeColor: AppColor.appColor,
-                        inactiveFillColor: AppColor.appColor,
+                            appContext: context,
+                            onChanged: (value) {},
+                            length: otpLength,
+                            animationType: AnimationType.fade,
+                            keyboardType: TextInputType.number,
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(10),
+                              fieldHeight: 42,
+                              fieldWidth: 42,
+                              borderWidth: 1,
+                              activeFillColor: AppColor.appColor,
+                              activeColor: AppColor.appColor,
+                              inactiveFillColor: AppColor.appColor,
                         inactiveColor: AppColor.blackColor,
                         selectedColor: AppColor.appColor,
                       ),
@@ -191,12 +191,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   Future signUp(BuildContext ctx) async {
     EasyLoading.show(status: 'Loading');
+    print(SignUpData.toString());
     var request = new http.MultipartRequest(
         "POST", Uri.parse(GlobalVariable.baseUrl + GlobalVariable.signup));
     request.headers.addAll(await CommonFunctions().getHeader());
     request.fields.addAll(SignUpData);
     http.MultipartFile multipartFile =
-    await http.MultipartFile.fromPath('profile_image', profileImage);
+        await http.MultipartFile.fromPath('profile_image', profileImage);
 
     request.files.add(multipartFile);
     var time = 0;
@@ -212,11 +213,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
         if (time == 0) {
           if (isFromUser) {
             SharedPref().setToken(res.body.authKey);
+            Get.back();
+            Get.back();
             Get.toNamed(Routes.setupProfileScreen, arguments: {
               "userName": res.body.fullName,
             });
           } else {
-            showSuccessDialog(res);
+            showSuccessDialog(res, res.body.authKey);
           }
 
           time = time + 1;
@@ -243,18 +246,15 @@ class _VerificationScreenState extends State<VerificationScreen> {
     }
   }
 
-  showSuccessDialog(LoginResponseModel result) {
+  showSuccessDialog(LoginResponseModel result, String authKey) {
     showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) =>
-            Dialog(
+        builder: (_) => Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0)),
               child: Container(
-                width: MediaQuery
-                    .of(context)
-                    .size
+                width: MediaQuery.of(context).size
                     .width,
                 padding:
                 const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
@@ -297,11 +297,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
                               textColor: AppColor.whiteColor,
                               onTap: () {
                                 // Get.back();
-                                SharedPref().setToken(authKey);
-                                SharedPref().setPreferenceJson(jsonEncode(
-                                    result));
-                                Get.offAllNamed(Routes.managerHomeScreen);
-                              },
+                                print(authKey);
+                            SharedPref().setToken(authKey);
+                            SharedPref().setPreferenceJson(jsonEncode(result));
+                            Get.offAllNamed(Routes.managerHomeScreen);
+                          },
                             )),
                       ],
                     )
@@ -354,7 +354,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       }
 
       EasyLoading.dismiss();
-      Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+      Fluttertoast.showToast(msg: 'OTP send', toastLength: Toast.LENGTH_SHORT);
     } catch (error) {
       EasyLoading.dismiss();
 
@@ -437,21 +437,29 @@ class _VerificationScreenState extends State<VerificationScreen> {
   String validation() {
     if (isFromLogin) {
       if (controllerNumber.text.isEmpty) {
-        return "Please enter Otp";
+        return "Please enter OTP";
+      } else if (controllerNumber.text.length != otpLength) {
+        return "Please enter valid OTP";
       } else {
         return "";
       }
     } else if (isFromUser) {
       if (controllerNumber.text.isEmpty) {
-        return "Please enter phonenumber Otp";
+        return "Please enter phone number OTP";
+      } else if (controllerNumber.text.length != otpLength) {
+        return "Please enter valid phone number OTP";
       } else if (controllerEmail.text.isEmpty) {
-        return "Please enter email Otp";
+        return "Please enter email OTP";
+      } else if (controllerEmail.text.length != otpLength) {
+        return "Please enter valid email OTP";
       } else {
         return "";
       }
     } else {
       if (controllerNumber.text.isEmpty) {
-        return "Please enter Otp";
+        return "Please enter OTP";
+      } else if (controllerNumber.text.length != otpLength) {
+        return "Please enter valid OTP";
       } else {
         return "";
       }

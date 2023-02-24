@@ -19,7 +19,6 @@ import 'package:http/http.dart' as http;
 import '../../models/get_categories_response.dart';
 import '../../util/common_funcations.dart';
 import '../../util/global_variable.dart';
-import '../../util/sharedPref.dart';
 
 class SetupProfileScreen extends StatefulWidget {
   const SetupProfileScreen({Key? key}) : super(key: key);
@@ -31,6 +30,8 @@ class SetupProfileScreen extends StatefulWidget {
 class _SetupProfilescreenState extends State<SetupProfileScreen> {
   List<File> imagesList = [];
   String category = '';
+  String lat = '';
+  String lng = '';
 
   // String signUpImage = '';
   List<CategoryModel> selectedCategoryList = [];
@@ -80,7 +81,13 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () => showImagePicker(),
+                      onTap: () {
+                        if (imagesList.length < 5) {
+                          showImagePicker();
+                        } else {
+                          Fluttertoast.showToast(msg: "Max 5 image Allowed");
+                        }
+                      },
                       child: Container(
                           margin: const EdgeInsets.only(top: 3),
                           height: 210,
@@ -281,10 +288,22 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                     const SizedBox(
                       height: 20,
                     ),
-                    SimpleTf(
-                      controller: controllerLocation,
-                      title: "Location",
-                      action: TextInputAction.next,
+                    InkWell(
+                      onTap: () => Get.toNamed(Routes.mapScreen)!.then((value) {
+                        controllerLocation.text = value['location'] ?? "";
+                        lat = value['lat'] ?? "";
+                        lng = value['lng'] ?? "";
+                        setState(() {});
+                      }),
+                      child: AbsorbPointer(
+                        absorbing: true,
+                        child: SimpleTf(
+                          controller: controllerLocation,
+                          title: "Location",
+                          lines: controllerLocation.text.length > 70 ? 2 : 1,
+                          height: controllerLocation.text.length > 70 ? 80 : 50,
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       height: 20,
@@ -337,6 +356,7 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                   children: [
                     AppText(
                         text: "Add Categories",
+                        maxlines: 30,
                         fontWeight: FontWeight.w400,
                         textSize: 13),
                     SimpleTf(
@@ -351,21 +371,27 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                     ElevatedBtn(
                         text: "Submit",
                         onTap: () {
-                          CategoryModel value = CategoryModel(
-                              name: controllerCat.text.trim().toString(),
-                              id: "0",
-                              isSelected: true,
-                              underLine: false);
-                          categoryList.removeAt(categoryList.length - 1);
-                          categoryList.add(value);
-                          categoryList.add(CategoryModel(
-                              name: 'Add Your Categories',
-                              id: "",
-                              underLine: true));
-                          category +=
-                              controllerCat.text.trim().toString() + ", ";
-                          selectedAddedCategories.add(value);
-                          Get.back();
+                          if (controllerCat.text.trim().isNotEmpty) {
+                            CategoryModel value = CategoryModel(
+                                name: controllerCat.text.trim().toString(),
+                                id: "0",
+                                isSelected: true,
+                                underLine: false);
+                            categoryList.removeAt(categoryList.length - 1);
+                            categoryList.add(value);
+                            categoryList.add(CategoryModel(
+                                name: 'Add Your Categories',
+                                id: "",
+                                underLine: true));
+                            category +=
+                                controllerCat.text.trim().toString() + ", ";
+                            selectedAddedCategories.add(value);
+                            Get.back();
+                            setState(() {});
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: "Please enter category");
+                          }
                         })
                   ],
                 ))));
@@ -535,8 +561,8 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
       "musician_name": musicianName,
       "location": controllerLocation.text.trim().toString(),
       "description": controllerDes.text.trim().toString(),
-      "lat": "0.0",
-      "lng": "0.0",
+      "lat": lat,
+      "lng": lng,
     };
     if (catId.isNotEmpty) {
       body['categoryId'] = catId;
@@ -550,8 +576,9 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
     request.headers.addAll(await CommonFunctions().getHeader());
     request.fields.addAll(body);
     List<http.MultipartFile> files = [];
-    for(var element in imagesList) {
-      var multipartFile = await http.MultipartFile.fromPath('images', element.path);
+    for (var element in imagesList) {
+      var multipartFile =
+          await http.MultipartFile.fromPath('images', element.path);
       files.add(multipartFile);
     }
     request.files.addAll(files);
@@ -564,7 +591,7 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
       if (res.code == 200) {
         // Navigator.pop(ctx);
         EasyLoading.dismiss();
-        SharedPref().setToken("");
+        // SharedPref().setToken("");
         showSuccessDialog();
         return;
       } else {
@@ -587,8 +614,8 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
         context: context,
         barrierDismissible: false,
         builder: (_) => WillPopScope(
-          onWillPop: () async => false,
-          child: Dialog(
+              onWillPop: () async => false,
+              child: Dialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0)),
                 child: Container(
@@ -607,7 +634,9 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                         height: 20,
                       ),
                       AppText(
-                          text: "Thanks",
+                          text:
+                              // "Thanks",
+                              "Signup Successful",
                           textColor: AppColor.blackColor,
                           textAlign: TextAlign.center,
                           textSize: 16,
@@ -617,7 +646,8 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                       ),
                       AppText(
                           text:
-                              "Your signed in successfully done\nwaiting to admin approval.",
+                              // "Your signed in successfully done\nwaiting to admin approval.",
+                              "Congratulations, you have\ncompleted your registration!",
                           textColor: AppColor.blackColor,
                           textAlign: TextAlign.center,
                           textSize: 12,
@@ -629,12 +659,15 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                         children: [
                           Expanded(
                               child: ElevatedBtn(
-                            text: 'OK',
+                            text:
+                                // 'OK',
+                                'Done',
                             buttonColor: AppColor.appColor,
                             textColor: AppColor.whiteColor,
                             onTap: () {
-                              Get.back();
-                              Get.offAllNamed(Routes.logInScreen);
+                              // Get.back();
+                              Get.offAllNamed(Routes.userMainScreen);
+                              // Get.offAllNamed(Routes.logInScreen);
                               // Get.toNamed(Routes.verificationScreen, arguments: {
                               //   "isFromLogin": false,
                               //   "userType": isSelectUser
@@ -647,19 +680,20 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                   ),
                 ),
               ),
-        ));
+            ));
   }
 
   String validation() {
     FocusScope.of(context).requestFocus(FocusScopeNode());
     if (imagesList.isEmpty) {
-      return "Please select atleast one image";
+      return "Please select at least one image";
     }
     /* else if (controllerMusicianName.text.trim().isEmpty) {
       return "Please enter musician name";
     }*/
-    else if (selectedCategoryList.isEmpty /*&& selectedAddedCategories.isEmpty*/) {
-      return "Please select atleast one category";
+    else if (selectedCategoryList
+        .isEmpty /*&& selectedAddedCategories.isEmpty*/) {
+      return "Please select at least one category";
     } else if (controllerLocation.text.trim().isEmpty) {
       return "Please select location";
     } else if (controllerDes.text.trim().isEmpty) {

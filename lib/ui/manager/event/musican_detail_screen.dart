@@ -6,15 +6,18 @@ import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:smooth_star_rating_null_safety/smooth_star_rating_null_safety.dart';
 
+import '../../../models/auth/login_response_model.dart';
 import '../../../models/user_detail_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
+import '../../../util/sharedPref.dart';
 import '../../../widgets/elevated_btn.dart';
 
 class MusicianDetailScreen extends StatefulWidget {
@@ -27,12 +30,23 @@ class MusicianDetailScreen extends StatefulWidget {
 class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
   var userId = '';
   var eventId = '';
+  var isInvited = false;
 
   @override
   void initState() {
     userId = Get.arguments['userId'] ?? "";
     eventId = Get.arguments['eventId'] ?? "";
+    isInvited = Get.arguments['isInvited'] ?? false;
+    getUserDetail();
     super.initState();
+  }
+
+  bool isUser = false;
+
+  void getUserDetail() async {
+    var d = await SharedPref().getPreferenceJson();
+    LoginResponseModel result = LoginResponseModel.fromJson(jsonDecode(d));
+    isUser = result.body.type == 1;
   }
 
   @override
@@ -85,14 +99,18 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                           Image.asset(
                                               'assets/images/ic_location_mark.png',
                                               height: 12),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 5.0),
-                                            child: AppText(
-                                              text:
-                                                  snapshot.data!.body.location,
-                                              textSize: 12,
-                                              fontWeight: FontWeight.w400,
+                                          Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 5.0),
+                                              child: AppText(
+                                                text: snapshot
+                                                    .data!.body.location,
+                                                maxlines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                textSize: 12,
+                                                fontWeight: FontWeight.w400,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -112,28 +130,31 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                 SizedBox(
                                   width: 10,
                                 ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    var success = await changeFavStatusApi(
-                                        context,
-                                        snapshot.data!.body.id.toString(),
-                                        snapshot.data!.body.isFav == 0
-                                            ? "1"
-                                            : "2");
+                                Visibility(
+                                  visible: !isUser,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      var success = await changeFavStatusApi(
+                                          context,
+                                          snapshot.data!.body.id.toString(),
+                                          snapshot.data!.body.isFav == 0
+                                              ? "1"
+                                              : "2");
 
-                                    if (success) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  child: snapshot.data!.body.isFav == 0
-                                      ? Image.asset(
-                                          'assets/images/ic_gray_heart.png',
-                                          height: 35,
-                                        )
-                                      : Image.asset(
-                                          'assets/images/ic_red_heart.png',
-                                          height: 35,
-                                        ),
+                                      if (success) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    child: snapshot.data!.body.isFav == 0
+                                        ? Image.asset(
+                                            'assets/images/ic_gray_heart.png',
+                                            height: 35,
+                                          )
+                                        : Image.asset(
+                                            'assets/images/ic_red_heart.png',
+                                            height: 35,
+                                          ),
+                                  ),
                                 )
                               ],
                             ),
@@ -160,24 +181,27 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                             const SizedBox(
                               height: 15,
                             ),
-                            AppText(
-                              text: "Reviews",
-                              textSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            snapshot.data!.body.ratingTo.isEmpty
+                                ? Container()
+                                : AppText(
+                                    text: "Reviews",
+                                    textSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             const SizedBox(
                               height: 12,
                             ),
                             ListView.builder(
                                 shrinkWrap: true,
-                                itemCount: 1,
+                                itemCount: snapshot.data!.body.ratingTo.length,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: ((context, index) {
                                   return InkWell(
                                     onTap: () {
                                       // Get.toNamed(Routes.musicianDetailScreen);
                                     },
-                                    child: snapshot.data!.body.ratingTo.id ==
+                                    child: snapshot.data!.body.ratingTo[index]
+                                                .id ==
                                             null
                                         ? Container()
                                         : Container(
@@ -208,7 +232,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                                             imageUrl: snapshot
                                                                 .data!
                                                                 .body
-                                                                .ratingTo
+                                                                .ratingTo[index]
                                                                 .user
                                                                 .profileImage!,
                                                             height: 65,
@@ -234,7 +258,8 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                                                 text: snapshot
                                                                     .data!
                                                                     .body
-                                                                    .ratingTo
+                                                                    .ratingTo[
+                                                                        index]
                                                                     .user
                                                                     .fullName!,
                                                                 textSize: 14,
@@ -251,11 +276,13 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                                                           5.0),
                                                               child: AppText(
                                                                   text: CommonFunctions()
-                                                                      .timeAgoFormat(snapshot
-                                                                          .data!
-                                                                          .body
-                                                                          .ratingTo
-                                                                          .createdAt!),
+                                                                      .timeAgoFormat(
+                                                                      snapshot
+                                                                      .data!
+                                                                      .body
+                                                                      .ratingTo[
+                                                                          index]
+                                                                      .createdAt!),
                                                                   textSize: 10),
                                                             ),
                                                           ],
@@ -270,7 +297,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                                           rating: snapshot
                                                               .data!
                                                               .body
-                                                              .ratingTo
+                                                              .ratingTo[index]
                                                               .rating!
                                                               .toDouble(),
                                                           size: 15.0,
@@ -284,7 +311,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                                 ),
                                                 AppText(
                                                   text: snapshot.data!.body
-                                                      .ratingTo.message!,
+                                                      .ratingTo[index].message!,
                                                   textSize: 12,
                                                   fontWeight: FontWeight.w400,
                                                 ),
@@ -296,11 +323,14 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                             const SizedBox(
                               height: 20,
                             ),
-                            ElevatedBtn(
-                              text: ' Send Invitation ',
-                              onTap: () {
-                                sendInviteToUser(context, userId);
-                              },
+                            Visibility(
+                              visible: !isUser && !isInvited,
+                              child: ElevatedBtn(
+                                text: ' Send Invitation ',
+                                onTap: () {
+                                  sendInviteToUser(context, userId);
+                                },
+                              ),
                             )
                           ],
                         ))

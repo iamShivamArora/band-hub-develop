@@ -97,6 +97,7 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         key: _scaffoldKey,
         appBar: HelperWidget.noAppBar(color: AppColor.appColor),
         backgroundColor: AppColor.whiteColor,
@@ -176,121 +177,121 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                     Expanded(
                       child: errorMsg.isNotEmpty
                           ? Center(
-                              child: AppText(
-                              text: errorMsg,
-                              fontWeight: FontWeight.w500,
-                              textSize: 16,
-                            ))
+                          child: AppText(
+                            text: errorMsg,
+                            fontWeight: FontWeight.w500,
+                            textSize: 16,
+                          ))
                           : loading
-                              ? Center(child: CommonFunctions().loadingCircle())
-                              : SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
+                          ? Center(child: CommonFunctions().loadingCircle())
+                          : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 220,
+                              width: Get.width,
+                              child: Stack(children: [
+                                PageView.builder(
+                                  itemCount: resultData!
+                                      .body.BannerList.length,
+                                  controller: controller,
+                                  onPageChanged: (value) {
+                                    setState(() {});
+                                  },
+                                  itemBuilder: (BuildContext context,
+                                      int itemIndex) {
+                                    return CommonFunctions()
+                                        .setNetworkImages(
+                                        imageUrl: resultData!
+                                            .body
+                                            .BannerList[itemIndex]
+                                            .bannerImage,
                                         height: 220,
-                                        width: Get.width,
-                                        child: Stack(children: [
-                                          PageView.builder(
-                                            itemCount: resultData!
-                                                .body.BannerList.length,
-                                            controller: controller,
-                                            onPageChanged: (value) {
-                                              setState(() {});
-                                            },
-                                            itemBuilder: (BuildContext context,
-                                                int itemIndex) {
-                                              return CommonFunctions()
-                                                  .setNetworkImages(
-                                                      imageUrl: resultData!
-                                                          .body
-                                                          .BannerList[itemIndex]
-                                                          .bannerImage,
-                                                      height: 220,
-                                                      width: MediaQuery.of(
-                                                              Get.context!)
-                                                          .size
-                                                          .width,
-                                                      circle: 15);
-                                            },
+                                        width: MediaQuery.of(
+                                            Get.context!)
+                                            .size
+                                            .width,
+                                        circle: 15);
+                                  },
+                                ),
+                                resultData!.body.BannerList.length ==
+                                    1
+                                    ? Container()
+                                    : Align(
+                                    alignment:
+                                    Alignment.bottomCenter,
+                                    child: Container(
+                                      margin:
+                                      const EdgeInsets.all(
+                                          10),
+                                      child: SmoothPageIndicator(
+                                          controller: controller,
+                                          // PageController
+                                          count: resultData!.body
+                                              .BannerList.length,
+                                          effect: ScrollingDotsEffect(
+                                              activeDotColor:
+                                              AppColor
+                                                  .appColor,
+                                              dotColor: AppColor
+                                                  .grayColor
+                                                  .withOpacity(
+                                                  .50),
+                                              spacing: 5,
+                                              dotHeight: 7,
+                                              dotWidth: 7),
+                                          // your preferred effect
+                                          onDotClicked:
+                                              (index) {}),
+                                    )),
+                              ]),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        AppText(
+                                          text: "Events",
+                                          textSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        const Spacer(),
+                                        resultData!.body.EventsList
+                                            .length >=
+                                            3
+                                            ? InkWell(
+                                          onTap: () async {
+                                            await Get.toNamed(Routes
+                                                .viewAllEventsScreen);
+                                            listingApi();
+                                            setState(() {});
+                                          },
+                                          child: AppText(
+                                            text: "View All",
+                                            textSize: 12,
+                                            textColor: AppColor
+                                                .appColor,
+                                            fontWeight:
+                                            FontWeight.w600,
+                                            underline: true,
                                           ),
-                                          resultData!.body.BannerList.length ==
-                                                  1
-                                              ? Container()
-                                              : Align(
-                                                  alignment:
-                                                      Alignment.bottomCenter,
-                                                  child: Container(
-                                                    margin:
-                                                        const EdgeInsets.all(
-                                                            10),
-                                                    child: SmoothPageIndicator(
-                                                        controller: controller,
-                                                        // PageController
-                                                        count: resultData!.body
-                                                            .BannerList.length,
-                                                        effect: ScrollingDotsEffect(
-                                                            activeDotColor:
-                                                                AppColor
-                                                                    .appColor,
-                                                            dotColor: AppColor
-                                                                .grayColor
-                                                                .withOpacity(
-                                                                    .50),
-                                                            spacing: 5,
-                                                            dotHeight: 7,
-                                                            dotWidth: 7),
-                                                        // your preferred effect
-                                                        onDotClicked:
-                                                            (index) {}),
-                                                  )),
-                                        ]),
-                                      ),
-                                      const SizedBox(
-                                        height: 20,
-                                      ),
-                                      Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 5),
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  AppText(
-                                                    text: "Events",
-                                                    textSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                  const Spacer(),
-                                                  resultData!.body.EventsList
-                                                              .length >=
-                                                          3
-                                                      ? InkWell(
-                                                          onTap: () async {
-                                                            await Get.toNamed(Routes
-                                                                .viewAllEventsScreen);
-                                                            listingApi();
-                                                            setState(() {});
-                                                          },
-                                                          child: AppText(
-                                                            text: "View All",
-                                                            textSize: 12,
-                                                            textColor: AppColor
-                                                                .appColor,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            underline: true,
-                                                          ),
-                                                        )
-                                                      : Container()
-                                                ],
-                                              ),
-                                              resultData!
-                                                      .body.EventsList.isEmpty
-                                                  ? Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: MediaQuery.of(
-                                                                      context)
-                                                                  .size
+                                        )
+                                            : Container()
+                                      ],
+                                    ),
+                                    resultData!
+                                        .body.EventsList.isEmpty
+                                        ? Padding(
+                                      padding: EdgeInsets.only(
+                                          top: MediaQuery.of(
+                                              context)
+                                              .size
                                                                   .height *
                                                               0.14),
                                                       child: Center(
@@ -301,207 +302,201 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                                         textSize: 16,
                                                       )),
                                                     )
-                                                  : ListView.builder(
-                                                      shrinkWrap: true,
-                                                      primary: false,
-                                                      physics:
-                                                          const NeverScrollableScrollPhysics(),
-                                                      itemCount: resultData!
+                                                  : Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: resultData!
+                                                                      .body
+                                                                      .EventsList
+                                                                      .length ==
+                                                                  2
+                                                              ? 60
+                                                              : 0),
+                                                      child: ListView.builder(
+                                                          shrinkWrap: true,
+                                                          primary: false,
+                                                          physics:
+                                                              const NeverScrollableScrollPhysics(),
+                                                          itemCount: resultData!
+                                                                      .body
+                                                                      .EventsList
+                                                                      .length >=
+                                                                  3
+                                                              ? 3
+                                                              : resultData!
                                                                   .body
                                                                   .EventsList
-                                                                  .length >=
-                                                              3
-                                                          ? 3
-                                                          : resultData!
-                                                              .body
-                                                              .EventsList
-                                                              .length,
-                                                      itemBuilder:
-                                                          (context, index) {
-                                                        return Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                      .only(
-                                                                  top: 10),
-                                                          child: Column(
-                                                            children: [
-                                                              Stack(
+                                                                  .length,
+                                                          itemBuilder:
+                                                              (context, index) {
+                                                            return Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      top: 10),
+                                                              child: Column(
                                                                 children: [
-                                                                  InkWell(
-                                                                    onTap:
-                                                                        () async {
-                                                                      await Get.toNamed(
-                                                                          Routes
-                                                                              .managerEventDetailScreen,
-                                                                          arguments: {
-                                                                            'eventId':
-                                                                                resultData!.body.EventsList[index].id.toString()
-                                                                          });
-                                                                      setState(
-                                                                          () {});
-                                                                    },
-                                                                    child:
-                                                                        Container(
-                                                                      height:
-                                                                          220,
-                                                                      margin: const EdgeInsets
-                                                                              .symmetric(
-                                                                          vertical:
-                                                                              8),
-                                                                      width: Get
-                                                                          .width,
-                                                                      foregroundDecoration:
-                                                                          BoxDecoration(
-                                                                        color: AppColor
-                                                                            .blackColor
-                                                                            .withAlpha(20),
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(15),
-                                                                      ),
-                                                                      child: CommonFunctions().setNetworkImages(
-                                                                          imageUrl: resultData!
-                                                                              .body
-                                                                              .EventsList[
-                                                                                  index]
-                                                                              .eventImages[
-                                                                                  0]
-                                                                              .images,
+                                                                  Stack(
+                                                                    children: [
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () async {
+                                                                          await Get.toNamed(
+                                                                              Routes.managerEventDetailScreen,
+                                                                              arguments: {
+                                                                                'eventId': resultData!.body.EventsList[index].id.toString()
+                                                                              });
+                                                                          setState(
+                                                                              () {});
+                                                                        },
+                                                                        child:
+                                                                            Container(
                                                                           height:
                                                                               220,
-                                                                          width: double
-                                                                              .infinity,
-                                                                          circle:
-                                                                              15,
-                                                                          boxFit:
-                                                                              BoxFit.cover),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned
-                                                                      .fill(
-                                                                    child:
-                                                                        Align(
-                                                                      alignment:
-                                                                          Alignment
-                                                                              .bottomLeft,
-                                                                      child:
-                                                                          Container(
-                                                                        margin:
-                                                                            const EdgeInsets.all(20),
+                                                                          margin:
+                                                                              const EdgeInsets.symmetric(vertical: 8),
+                                                                          width:
+                                                                              Get.width,
+                                                                          foregroundDecoration:
+                                                                              BoxDecoration(
+                                                                            color:
+                                                                                AppColor.blackColor.withAlpha(20),
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(15),
+                                                                          ),
+                                                                          child: CommonFunctions().setNetworkImages(
+                                                                              imageUrl: resultData!.body.EventsList[index].eventImages[0].images,
+                                                                              height: 220,
+                                                                              width: double.infinity,
+                                                                              circle: 15,
+                                                                              boxFit: BoxFit.cover),
+                                                                        ),
+                                                                      ),
+                                                                      Positioned
+                                                                          .fill(
                                                                         child:
-                                                                            Row(
-                                                                          crossAxisAlignment:
-                                                                              CrossAxisAlignment.end,
-                                                                          children: [
-                                                                            Expanded(
-                                                                              child: Column(
-                                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                children: [
-                                                                                  AppText(
-                                                                                    text: resultData!.body.EventsList[index].name,
-                                                                                    textSize: 15,
-                                                                                    fontWeight: FontWeight.w600,
-                                                                                    textColor: AppColor.whiteColor,
+                                                                            Align(
+                                                                          alignment:
+                                                                              Alignment.bottomLeft,
+                                                                          child:
+                                                                              Container(
+                                                                            margin:
+                                                                                const EdgeInsets.all(20),
+                                                                            child:
+                                                                                Row(
+                                                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                                                              children: [
+                                                                                Expanded(
+                                                                                  child: Column(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    children: [
+                                                                                      AppText(
+                                                                                        text: resultData!.body.EventsList[index].name,
+                                                                                        textSize: 15,
+                                                                                        fontWeight: FontWeight.w600,
+                                                                                        textColor: AppColor.whiteColor,
+                                                                                      ),
+                                                                                      Row(children: [
+                                                                                        Image.asset(
+                                                                                          'assets/images/ic_location_mark.png',
+                                                                                          height: 12,
+                                                                                          color: AppColor.whiteColor,
+                                                                                        ),
+                                                                                        Expanded(
+                                                                                          child: Padding(
+                                                                                            padding: const EdgeInsets.only(left: 5.0, right: 8),
+                                                                                            child: AppText(
+                                                                                              overflow: TextOverflow.ellipsis,
+                                                                                              text: resultData!.body.EventsList[index].location,
+                                                                                              textSize: 12,
+                                                                                              maxlines: 2,
+                                                                                              fontWeight: FontWeight.w500,
+                                                                                              textColor: AppColor.whiteColor,
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ]),
+                                                                                    ],
                                                                                   ),
-                                                                                  Row(children: [
-                                                                                    Image.asset(
-                                                                                      'assets/images/ic_location_mark.png',
-                                                                                      height: 12,
+                                                                                ),
+                                                                                Row(
+                                                                                  children: [
+                                                                                    InkWell(
+                                                                                      onTap: () async {
+                                                                                        await Get.toNamed(Routes.createEventScreen, arguments: {
+                                                                                          "isEdit": true,
+                                                                                          'data': resultData!.body.EventsList[index]
+                                                                                        });
+                                                                                        listingApi();
+                                                                                        setState(() {});
+                                                                                      },
+                                                                                      child: SizedBox(
+                                                                                        height: 20,
+                                                                                        child: Center(
+                                                                                          child: AppText(
+                                                                                            text: "Edit  ",
+                                                                                            textSize: 12,
+                                                                                            fontWeight: FontWeight.w500,
+                                                                                            textColor: AppColor.whiteColor,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                    Container(
+                                                                                      height: 10,
+                                                                                      width: 1,
                                                                                       color: AppColor.whiteColor,
                                                                                     ),
-                                                                                    Expanded(
-                                                                                      child: Padding(
-                                                                                        padding: const EdgeInsets.only(left: 5.0, right: 8),
+                                                                                    InkWell(
+                                                                                      onTap: () => showActionDialog(resultData!.body.EventsList[index].id.toString()),
+                                                                                      child: SizedBox(
+                                                                                        height: 20,
                                                                                         child: AppText(
-                                                                                          overflow: TextOverflow.ellipsis,
-                                                                                          text: resultData!.body.EventsList[index].location,
+                                                                                          text: "   Delete",
                                                                                           textSize: 12,
-                                                                                          maxlines: 2,
                                                                                           fontWeight: FontWeight.w500,
                                                                                           textColor: AppColor.whiteColor,
                                                                                         ),
                                                                                       ),
                                                                                     ),
-                                                                                  ]),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                            Row(
-                                                                              children: [
-                                                                                InkWell(
-                                                                                  onTap: () async {
-                                                                                    await Get.toNamed(Routes.createEventScreen, arguments: {
-                                                                                      "isEdit": true,
-                                                                                      'data': resultData!.body.EventsList[index]
-                                                                                    });
-                                                                                    listingApi();
-                                                                                    setState(() {});
-                                                                                  },
-                                                                                  child: SizedBox(
-                                                                                    height: 20,
-                                                                                    child: Center(
-                                                                                      child: AppText(
-                                                                                        text: "Edit  ",
-                                                                                        textSize: 12,
-                                                                                        fontWeight: FontWeight.w500,
-                                                                                        textColor: AppColor.whiteColor,
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                Container(
-                                                                                  height: 10,
-                                                                                  width: 1,
-                                                                                  color: AppColor.whiteColor,
-                                                                                ),
-                                                                                InkWell(
-                                                                                  onTap: () => showActionDialog(resultData!.body.EventsList[index].id.toString()),
-                                                                                  child: SizedBox(
-                                                                                    height: 20,
-                                                                                    child: AppText(
-                                                                                      text: "   Delete",
-                                                                                      textSize: 12,
-                                                                                      fontWeight: FontWeight.w500,
-                                                                                      textColor: AppColor.whiteColor,
-                                                                                    ),
-                                                                                  ),
+                                                                                  ],
                                                                                 ),
                                                                               ],
                                                                             ),
-                                                                          ],
+                                                                          ),
                                                                         ),
                                                                       ),
-                                                                    ),
+                                                                      // Align(
+                                                                      //   alignment: Alignment.topRight,
+                                                                      //   child: Padding(
+                                                                      //     padding:
+                                                                      //         const EdgeInsets.fromLTRB(
+                                                                      //             0, 20, 15, 0),
+                                                                      //     child: Image.asset(
+                                                                      //       'assets/images/ic_gray_heart.png',
+                                                                      //       height: 40,
+                                                                      //     ),
+                                                                      //   ),
+                                                                      // )
+                                                                    ],
                                                                   ),
-                                                                  // Align(
-                                                                  //   alignment: Alignment.topRight,
-                                                                  //   child: Padding(
-                                                                  //     padding:
-                                                                  //         const EdgeInsets.fromLTRB(
-                                                                  //             0, 20, 15, 0),
-                                                                  //     child: Image.asset(
-                                                                  //       'assets/images/ic_gray_heart.png',
-                                                                  //       height: 40,
-                                                                  //     ),
-                                                                  //   ),
-                                                                  // )
+                                                                  SizedBox(
+                                                                    height:
+                                                                        index ==
+                                                                                2
+                                                                            ? 70
+                                                                            : 0,
+                                                                  ),
                                                                 ],
                                                               ),
-                                                              SizedBox(
-                                                                height:
-                                                                    index == 2
-                                                                        ? 70
-                                                                        : 0,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      })
+                                                            );
+                                                          }),
+                                                    )
                                             ],
-                                          ))
-                                    ],
-                                  ),
-                                ),
+                                ))
+                          ],
+                        ),
+                      ),
                     )
                   ],
                 ),
@@ -921,7 +916,8 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
       EasyLoading.dismiss();
 
       Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
-      setState(() {});
+      listingApi();
+      // setState(() {});
     } catch (error) {
       EasyLoading.dismiss();
 

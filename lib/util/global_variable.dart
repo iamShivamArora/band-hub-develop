@@ -35,6 +35,8 @@ class GlobalVariable {
   static const bookingsCalendar = "bookings?date=";
   static const inviteUsers = "inviteUsers";
   static const bookingList = "bookingList?type=";
+  static const cancelBooking = "cancelBooking";
+  static const addReview = "addReview";
 
   /////
   static const userData = "userData";

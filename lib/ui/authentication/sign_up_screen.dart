@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:band_hub/models/auth/login_response_model.dart';
 import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
@@ -34,7 +33,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isSelectUser = true;
   bool passwordView = true;
   bool confirmPasswordView = true;
-  String countryCode = "+91";
+  String countryCode = "+1";
+  Country? selectedCountryData;
 
   bool acceptTerms = false;
 
@@ -171,6 +171,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     SimpleTf(
                       controller: controllerName,
                       title: "Full Name",
+                      maxLength: 25,
                       action: TextInputAction.next,
                     ),
                     const SizedBox(
@@ -180,10 +181,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       controller: controllerNumber,
                       action: TextInputAction.next,
                       title: 'Phone Number',
+                      hint: 'Phone Number',
                       onChanged: (_) {
                         countryCode = "+" + _.dialingCode;
+                        selectedCountryData = _;
+                        setState(() {});
                       },
-                      selectedCountry: Country.IN,
+                      selectedCountry: selectedCountryData != null
+                          ? selectedCountryData!
+                          : Country.US,
                     ),
                     const SizedBox(
                       height: 20,
@@ -322,7 +328,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       text: 'Create Account',
                       onTap: (() {
                         if (validation().isEmpty) {
-
                           getOtpApi(context);
 
                           // if (!isSelectUser) {
@@ -376,8 +381,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future getOtpApi(BuildContext ctx) async {
-
-    Map<dynamic, dynamic> body ={
+    Map<dynamic, dynamic> body = {
       'email': controllerEmail.text.trim().toString(),
       'phone_number': controllerNumber.text.trim().toString(),
       'countryCode': countryCode,
@@ -412,17 +416,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Map<String, String> signUpBody = {
         "full_name": controllerName.text.trim().toString(),
         "email": controllerEmail.text.trim().toString(),
-        "password":
-        controllerPassword.text.trim().toString(),
+        "password": controllerPassword.text.trim().toString(),
         "phone": controllerNumber.text.trim().toString(),
         "countryCode": countryCode,
         "type": isSelectUser ? "1" : "2",
         "device_type": "1",
         "device_token": "saa",
       };
+      if (!isSelectUser) {
+        signUpBody['description'] = controllerAbout.text.trim().toString();
+      }
       Get.toNamed(Routes.verificationScreen, arguments: {
         "isFromLogin": false,
-        "signupData":signUpBody,
+        "signupData": signUpBody,
         "userType": isSelectUser,
         "profileImage": imageFile!.path,
       });
@@ -436,9 +442,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       throw error.toString();
     }
   }
-
-
-
 
   void showImagePicker() {
     showDialog(
@@ -531,8 +534,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-
-
   String validation() {
     FocusScope.of(context).requestFocus(FocusScopeNode());
     if (imageFile == null) {
@@ -548,6 +549,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } else if (!CommonFunctions()
         .isEmailValid(controllerEmail.text.trim().toString())) {
       return "Please enter valid email";
+    } else if (!isSelectUser && controllerAbout.text.trim().isEmpty) {
+      return "Please enter about";
     } else if (controllerPassword.text.trim().isEmpty) {
       return "Please enter password";
     } else if (controllerPassword.text.length < 6) {
@@ -559,11 +562,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } else if (!acceptTerms) {
       return "Please accept terms and conditions";
     } else {
-      if (!isSelectUser) {
+      /*if (!isSelectUser) {
         if (controllerAbout.text.trim().isEmpty) {
-          return "Please enter About";
+          return "Please enter about";
         }
-      }
+      }*/
       return "";
     }
   }

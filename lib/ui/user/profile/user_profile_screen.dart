@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:band_hub/models/auth/login_response_model.dart';
 import 'package:band_hub/routes/Routes.dart';
-import 'package:band_hub/ui/manager/profile/controller/profile_controller.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/custom_phone_text_field.dart';
@@ -17,9 +15,12 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
+import '../../../models/get_categories_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
 import '../../../widgets/country_picker/country.dart';
+import '../../authentication/setup_profile_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({Key? key}) : super(key: key);
@@ -34,16 +35,166 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   TextEditingController controllerName = TextEditingController();
   TextEditingController controllerEmail = TextEditingController();
   TextEditingController controllerNumber = TextEditingController();
+  TextEditingController controllerDes = TextEditingController();
+  TextEditingController controllerLocation = TextEditingController();
+  String lat = "";
+  String lng = "";
+  String category = "";
   String countryCode = "";
-  Country selectedCountryIsoName = Country.IN;
+  Country selectedCountryIsoName = Country.US;
   String imageFile = "";
   bool isEditProfile = false;
   bool gotData = false;
+  List<CategoryModel> categoryList = [];
+  List<CategoryModel> selectedCategoryList = [];
+  List<CategoryModel> selectedAddedCategories = [];
 
   @override
   void initState() {
     getProfileApi(context);
+
     super.initState();
+  }
+
+  getCategoryList() async {
+    GetCategoriesResponse result = await categoryListApi(context);
+    for (var element in result.body) {
+      categoryList.add(CategoryModel(
+          name: element.name,
+          id: element.id.toString(),
+          underLine: false,
+          isSelected: category.contains(element.name)));
+    }
+    selectedCategoryList
+        .addAll(categoryList.where((element) => element.isSelected));
+
+    categoryList.add(
+        CategoryModel(name: 'Add Your Categories', id: "", underLine: true));
+    setState(() {});
+  }
+
+  Future<GetCategoriesResponse> categoryListApi(BuildContext ctx) async {
+    EasyLoading.show(status: 'Loading');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    // if (loader != null) {
+    //   loader.changeIsShowToast(
+    //       !response.request!.url.path.contains(GlobalVariable.logout));
+    // }
+
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
+    var response = await http.get(
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.getUserCategories),
+        headers: await CommonFunctions().getHeader());
+
+    // if (response.statusCode == 201) {}
+    print(response.body);
+    GetCategoriesResponse? result = null;
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+
+      result = GetCategoriesResponse.fromJson(res);
+      if (res['code'] != 200 || json == null) {
+        String error = res['msg'];
+        // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
+        // Navigator.pop(ctx);
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+
+      EasyLoading.dismiss();
+
+      return result;
+    } catch (error) {
+      EasyLoading.dismiss();
+      if (result != null) {
+        Fluttertoast.showToast(
+            msg: result.msg, toastLength: Toast.LENGTH_SHORT);
+        throw result.msg;
+      } else {
+        Fluttertoast.showToast(
+            msg: error.toString().substring(
+                error.toString().indexOf(':') + 1, error.toString().length),
+            toastLength: Toast.LENGTH_SHORT);
+        throw error.toString();
+      }
+    }
+  }
+
+  void showCatrgoryDialog() {
+    final controllerCat = TextEditingController();
+    showDialog(
+        context: Get.context!,
+        builder: (_) => Dialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0)),
+            child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                decoration: BoxDecoration(
+                    color: AppColor.whiteColor,
+                    borderRadius: BorderRadius.circular(15)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppText(
+                        text: "Add Categories",
+                        fontWeight: FontWeight.w400,
+                        textSize: 13),
+                    SimpleTf(
+                      controller: controllerCat,
+                      hint: "Enter Category",
+                      inputType: TextInputType.text,
+                      action: TextInputAction.done,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    ElevatedBtn(
+                        text: "Submit",
+                        onTap: () {
+                          if (controllerCat.text.trim().toString().isNotEmpty) {
+                            print(controllerCat.text.trim().toString());
+                            print(categoryList[categoryList.length - 2].name);
+                            var contain = false;
+                            for (var it in categoryList) {
+                              if (it.name.trim() ==
+                                  controllerCat.text.trim().toString()) {
+                                contain = true;
+                                break;
+                              }
+                            }
+                            if (contain) {
+                              Fluttertoast.showToast(
+                                  msg: 'Category already added');
+                            } else {
+                              CategoryModel value = CategoryModel(
+                                  name: controllerCat.text.trim().toString(),
+                                  id: "0",
+                                  isSelected: true,
+                                  underLine: false);
+                              categoryList.removeAt(categoryList.length - 1);
+                              categoryList.add(value);
+                              categoryList.add(CategoryModel(
+                                  name: 'Add Your Categories',
+                                  id: "",
+                                  underLine: true));
+                              category +=
+                                  controllerCat.text.trim().toString() + ", ";
+                              selectedAddedCategories.add(value);
+                              Get.back();
+                            }
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: 'Please enter category');
+                          }
+                        })
+                  ],
+                ))));
   }
 
   @override
@@ -155,11 +306,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                                   offset: const Offset(0, 4)),
                                             ]),
                                         child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             SimpleTf(
                                               controller: controllerName,
                                               title: 'Full Name',
                                               height: 45,
+                                              maxLength: 25,
                                             ),
                                             const SizedBox(
                                               height: 15,
@@ -186,7 +340,213 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                               controller: controllerEmail,
                                               title: 'Email',
                                               height: 45,
-                                            )
+                                            ),
+                                            const SizedBox(
+                                              height: 15,
+                                            ),
+                                            InkWell(
+                                              onTap: () =>
+                                                  Get.toNamed(Routes.mapScreen)!
+                                                      .then((value) {
+                                                controllerLocation.text =
+                                                    value['location'] ?? "";
+                                                lat = value['lat'] ?? "";
+                                                lng = value['lng'] ?? "";
+                                                setState(() {});
+                                              }),
+                                              child: AbsorbPointer(
+                                                absorbing: true,
+                                                child: SimpleTf(
+                                                  controller:
+                                                      controllerLocation,
+                                                  title: "Location",
+                                                  lines: controllerLocation
+                                                              .text.length >
+                                                          50
+                                                      ? 2
+                                                      : 1,
+                                                  height: controllerLocation
+                                                              .text.length >
+                                                          50
+                                                      ? 80
+                                                      : 50,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 15,
+                                            ),
+                                            Text(
+                                              'Categories',
+                                              style: TextStyle(
+                                                  color: AppColor.blackColor,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 13),
+                                            ),
+                                            Container(
+                                                height: 50,
+                                                margin: const EdgeInsets.only(
+                                                    top: 2),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 15),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                        color:
+                                                            AppColor.grayColor,
+                                                        width: 1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12)),
+                                                child:
+                                                    DropdownButtonHideUnderline(
+                                                  child: DropdownButton<
+                                                      CategoryModel>(
+                                                    isExpanded: true,
+                                                    elevation: 2,
+                                                    isDense: true,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    hint: AppText(
+                                                        text: category.isEmpty
+                                                            ? "Select Categories"
+                                                            : category,
+                                                        textColor:
+                                                            AppColor.blackColor,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        textSize: 13),
+                                                    items: categoryList.map(
+                                                        (CategoryModel value) {
+                                                      return DropdownMenuItem<
+                                                          CategoryModel>(
+                                                        value: value,
+                                                        child: Row(
+                                                          children: [
+                                                            Expanded(
+                                                                child: AppText(
+                                                              text: value.name,
+                                                              textColor: value
+                                                                          .underLine ??
+                                                                      false
+                                                                  ? AppColor
+                                                                      .appColor
+                                                                  : AppColor
+                                                                      .blackColor,
+                                                              underline: value
+                                                                      .underLine ??
+                                                                  false,
+                                                              textSize: 14,
+                                                            )),
+                                                            Visibility(
+                                                              visible: !(value
+                                                                      .underLine ??
+                                                                  false),
+                                                              child: SizedBox(
+                                                                height: 16,
+                                                                width: 16,
+                                                                child: Stack(
+                                                                  children: [
+                                                                    Image.asset(
+                                                                      'assets/images/ic_check_box.png',
+                                                                      height:
+                                                                          16,
+                                                                      width: 16,
+                                                                    ),
+                                                                    Visibility(
+                                                                      visible: value
+                                                                          .isSelected,
+                                                                      child: Positioned.fill(
+                                                                          child: Align(
+                                                                              alignment: Alignment.center,
+                                                                              child: Image.asset(
+                                                                                'assets/images/ic_tick.png',
+                                                                                height: 10,
+                                                                                width: 10,
+                                                                              ))),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                    onChanged: (value) {
+                                                      if ((value?.underLine ??
+                                                          false)) {
+                                                        showCatrgoryDialog();
+                                                      } else {
+                                                        if (value!.id == "0") {
+                                                          if (value
+                                                              .isSelected) {
+                                                            value.isSelected =
+                                                                false;
+                                                            // if (category.contains(value.name.toString())) {
+                                                            category = category
+                                                                .replaceAll(
+                                                                    value.name
+                                                                            .toString() +
+                                                                        ",",
+                                                                    '');
+                                                            selectedAddedCategories
+                                                                .remove(value);
+                                                            setState(() {});
+                                                            return;
+                                                            // }
+                                                          }
+                                                          value.isSelected =
+                                                              true;
+                                                          category += value.name
+                                                                  .toString() +
+                                                              ",";
+                                                          selectedAddedCategories
+                                                              .add(value);
+                                                        } else {
+                                                          if (value
+                                                              .isSelected) {
+                                                            value.isSelected =
+                                                                false;
+                                                            // if (category.contains(value.name.toString())) {
+                                                            category = category
+                                                                .replaceAll(
+                                                                    value.name
+                                                                            .toString() +
+                                                                        ",",
+                                                                    '')
+                                                                .trim();
+                                                            selectedCategoryList
+                                                                .remove(value);
+                                                            setState(() {});
+                                                            return;
+                                                            // }
+                                                          }
+                                                          value.isSelected =
+                                                              true;
+                                                          category += (value
+                                                                      .name
+                                                                      .toString() +
+                                                                  ",")
+                                                              .trim();
+                                                          selectedCategoryList
+                                                              .add(value);
+                                                        }
+                                                      }
+                                                      setState(() {});
+                                                    },
+                                                  ),
+                                                )),
+                                            const SizedBox(
+                                              height: 15,
+                                            ),
+                                            SimpleTf(
+                                              controller: controllerDes,
+                                              title: 'Description',
+                                              height: 45,
+                                            ),
                                           ],
                                         ))
                                     : Container(
@@ -258,6 +618,68 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                                         .trim()
                                                         .toString(),
                                                 textSize: 13,
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              AppText(
+                                                text: 'Description',
+                                                textSize: 13,
+                                              ),
+                                              AppText(
+                                                text: controllerDes.text
+                                                    .trim()
+                                                    .toString(),
+                                                textSize: 13,
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              AppText(
+                                                text: category.contains(',')
+                                                    ? 'Categories'
+                                                    : 'Category',
+                                                textSize: 13,
+                                              ),
+                                              AppText(
+                                                text: category,
+                                                textSize: 13,
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: AppText(
+                                                  text: 'Location',
+                                                  textSize: 13,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: AppText(
+                                                  textAlign: TextAlign.end,
+                                                  text: controllerLocation.text
+                                                      .trim()
+                                                      .toString(),
+                                                  textSize: 13,
+                                                ),
                                               )
                                             ],
                                           )
@@ -422,11 +844,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       EasyLoading.dismiss();
       controllerName.text = res['body']['full_name'];
       controllerEmail.text = res['body']['email'];
+      controllerLocation.text = res['body']['location'];
       controllerNumber.text = res['body']['phone'];
+      controllerDes.text = res['body']['description'];
+      category = res['body']['categoryName'].toString() + ', ';
       countryCode = res['body']['countryCode'];
       imageFile = res['body']['profileImage'];
       getCountryIso(countryCode);
-
+      getCategoryList();
       gotData = true;
 
       setState(() {});
@@ -442,12 +867,36 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future editProfileApi(BuildContext ctx) async {
+    var catId = "";
+    for (var element in selectedCategoryList) {
+      if (catId.isEmpty) {
+        catId = element.id;
+      } else {
+        catId = catId + "," + element.id;
+      }
+    }
+    var addedCatId = "";
+    for (var element in selectedAddedCategories) {
+      if (addedCatId.isEmpty) {
+        addedCatId = element.name;
+      } else {
+        addedCatId = addedCatId + "," + element.name;
+      }
+    }
     Map<String, String> body = {
       "full_name": controllerName.text.trim().toString(),
+      "musician_name": controllerName.text.trim().toString(),
       "email": controllerEmail.text.trim().toString(),
       "phone": controllerNumber.text.trim().toString(),
       "countryCode": countryCode,
+      "location": controllerLocation.text.trim().toString(),
+      "about": controllerDes.text.trim().toString(),
+      "lat": lat,
+      "lng": lng
     };
+    if (catId.isNotEmpty) {
+      body['categoryId'] = catId;
+    }
     print(body);
     EasyLoading.show(status: 'Loading');
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -491,12 +940,36 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future editProfileApiWithImage(BuildContext ctx) async {
+    var catId = "";
+    for (var element in selectedCategoryList) {
+      if (catId.isEmpty) {
+        catId = element.id;
+      } else {
+        catId = catId + "," + element.id;
+      }
+    }
+    var addedCatId = "";
+    for (var element in selectedAddedCategories) {
+      if (addedCatId.isEmpty) {
+        addedCatId = element.name;
+      } else {
+        addedCatId = addedCatId + "," + element.name;
+      }
+    }
     Map<String, String> body = {
       "full_name": controllerName.text.trim().toString(),
+      "musician_name": controllerName.text.trim().toString(),
       "email": controllerEmail.text.trim().toString(),
       "phone": controllerNumber.text.trim().toString(),
       "countryCode": countryCode,
+      "location": controllerLocation.text.trim().toString(),
+      "about": controllerDes.text.trim().toString(),
+      "lat": lat,
+      "lng": lng
     };
+    if (catId.isNotEmpty) {
+      body['categoryId'] = catId;
+    }
     print(body);
     EasyLoading.show(status: 'Loading');
     var request = new http.MultipartRequest(
@@ -513,14 +986,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       var result = await response.stream.bytesToString();
       print(result);
-      var res = LoginResponseModel.fromJson(json.decode(result));
-      if (res.code == 200) {
+      var res = json.decode(result);
+      if (res['code'] == 200) {
         // Navigator.pop(ctx);
         EasyLoading.dismiss();
         if (time == 0) {
           print(res);
           Get.back();
-          Fluttertoast.showToast(msg: res.msg);
+          Fluttertoast.showToast(msg: res['msg']);
           time = time + 1;
           print("sucasdsadsadasdasdascccccc");
         } else {
@@ -531,7 +1004,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       } else {
         EasyLoading.dismiss();
         // Navigator.pop(ctx);
-        throw new Exception(res.msg);
+        throw new Exception(res['msg']);
       }
     } catch (error) {
       EasyLoading.dismiss();
@@ -566,6 +1039,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     } else if (!CommonFunctions()
         .isEmailValid(controllerEmail.text.trim().toString())) {
       return "Please enter valid email";
+    } else if (selectedCategoryList
+        .isEmpty /*&& selectedAddedCategories.isEmpty*/) {
+      return "Please select atleast one category";
+    } else if (controllerLocation.text.trim().isEmpty) {
+      return "Please select location";
+    } else if (controllerDes.text.trim().isEmpty) {
+      return "Please enter description";
     } else {
       return "";
     }

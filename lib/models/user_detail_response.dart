@@ -62,6 +62,7 @@ class Body {
     required this.updatedAt,
     required this.categoryName,
     required this.isFav,
+    required this.rateCount,
     required this.ratingTo,
   });
 
@@ -97,7 +98,8 @@ class Body {
   late final String updatedAt;
   late final String categoryName;
   late final int isFav;
-  late final RatingTo ratingTo;
+  late final int rateCount;
+  late final List<RatingTo> ratingTo;
 
   Body.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -132,7 +134,9 @@ class Body {
     updatedAt = json['updatedAt'];
     categoryName = json['categoryName'];
     isFav = json['isFav'];
-    ratingTo = RatingTo.fromJson(json['ratingTo']);
+    rateCount = json['rateCount'];
+    ratingTo =
+        List.from(json['ratingTo']).map((e) => RatingTo.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -169,7 +173,8 @@ class Body {
     _data['updatedAt'] = updatedAt;
     _data['categoryName'] = categoryName;
     _data['isFav'] = isFav;
-    _data['ratingTo'] = ratingTo.toJson();
+    _data['rateCount'] = rateCount;
+    _data['ratingTo'] = ratingTo.map((e) => e.toJson()).toList();
     return _data;
   }
 }

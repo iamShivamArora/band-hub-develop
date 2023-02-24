@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:band_hub/models/user/event_booking_list_response.dart';
 import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
@@ -12,7 +13,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import '../../../../models/manager/event_listing_response.dart';
 import '../../../../util/common_funcations.dart';
 import '../../../../util/global_variable.dart';
 
@@ -96,7 +96,7 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
               height: 10,
             ),
             Expanded(
-                child: FutureBuilder<EventListingResponse>(
+                child: FutureBuilder<EventBookingListResponse>(
                     future: eventListingApi(context),
                     builder: ((context, snapshot) {
                       if (snapshot.hasData) {
@@ -133,7 +133,7 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                                 Routes.managerEventDetailScreen,
                                                 arguments: {
                                                   'eventId': snapshot
-                                                      .data!.body[index].id
+                                                      .data!.body[index].eventId
                                                       .toString(),
                                                   'isFromCurrent':
                                                       isSelectCurrent.toString()
@@ -150,10 +150,14 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                           child: CommonFunctions()
                                               .setNetworkImages(
                                             imageUrl: snapshot.data!.body[index]
-                                                    .eventImages.isEmpty
+                                                    .event.eventImages.isEmpty
                                                 ? ''
-                                                : snapshot.data!.body[index]
-                                                    .eventImages[0].images,
+                                                : snapshot
+                                                    .data!
+                                                    .body[index]
+                                                    .event
+                                                    .eventImages[0]
+                                                    .images,
                                             width: Get.width,
                                             height: 200,
                                           )
@@ -178,8 +182,8 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                           Row(
                                             children: [
                                               AppText(
-                                                text: snapshot
-                                                    .data!.body[index].name,
+                                                text: snapshot.data!.body[index]
+                                                    .event.name,
                                                 textSize: 15,
                                                 fontWeight: FontWeight.w500,
                                               ),
@@ -205,8 +209,11 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                                     maxlines: 2,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    text: snapshot.data!
-                                                        .body[index].location,
+                                                    text: snapshot
+                                                        .data!
+                                                        .body[index]
+                                                        .event
+                                                        .location,
                                                     textSize: 12,
                                                     fontWeight: FontWeight.w400,
                                                   ),
@@ -214,9 +221,10 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                               ),
                                               AppText(
                                                 text: CommonFunctions()
-                                                    .getStatusType(snapshot
+                                                    .getEventStatusType(snapshot
                                                         .data!
                                                         .body[index]
+                                                        .event
                                                         .status),
                                                 textSize: 12,
                                                 fontWeight: FontWeight.w400,
@@ -224,6 +232,7 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                                     .getColorForStatus(snapshot
                                                         .data!
                                                         .body[index]
+                                                        .event
                                                         .status),
                                               ),
                                             ],
@@ -250,7 +259,7 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
         ));
   }
 
-  Future<EventListingResponse> eventListingApi(BuildContext ctx) async {
+  Future<EventBookingListResponse> eventListingApi(BuildContext ctx) async {
     var connectivityResult = await (Connectivity().checkConnectivity());
 
     if (!(connectivityResult == ConnectivityResult.mobile ||
@@ -271,7 +280,7 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
         print("scasd  " + error);
         throw new Exception(error);
       }
-      EventListingResponse result = EventListingResponse.fromJson(res);
+      EventBookingListResponse result = EventBookingListResponse.fromJson(res);
 
       return result;
     } catch (error) {

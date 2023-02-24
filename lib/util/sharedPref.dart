@@ -13,7 +13,7 @@ class SharedPref {
 
   Future<String> getPreferenceJson() async {
     sharedPref = await SharedPreferences.getInstance();
-    return sharedPref!.getString(GlobalVariable.userData)!;
+    return sharedPref!.getString(GlobalVariable.userData) ?? "";
   }
 
 

@@ -10,6 +10,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../../../models/manager/fav_musician_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
@@ -25,18 +26,18 @@ class _FavouriteEventScreenState extends State<FavouriteEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: HelperWidget.customAppBar(title: "Favourite Musician"),
+        appBar: HelperWidget.customAppBar(title: "Favourite Musicians"),
         body: FutureBuilder<FavMusicianResponse>(
             future: favListApi(context),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return snapshot.data!.body.isEmpty
                     ? Center(
-                    child: AppText(
-                      text: "No Musician Found",
-                      fontWeight: FontWeight.w500,
-                      textSize: 16,
-                    ))
+                        child: AppText(
+                        text: "No Musician Found",
+                        fontWeight: FontWeight.w500,
+                        textSize: 16,
+                      ))
                     :Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: ListView.builder(
@@ -47,8 +48,15 @@ class _FavouriteEventScreenState extends State<FavouriteEventScreen> {
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
-                            Get.toNamed(Routes.musicianDetailScreen);
-                          },
+                                  Get.toNamed(Routes.musicianDetailScreen,
+                                      arguments: {
+                                        'userId': snapshot
+                                            .data!.body[index].user.id
+                                            .toString(),
+                                        'eventId': "",
+                                        'isInvited': true
+                                      });
+                                },
                           child: Container(
                             margin: const EdgeInsets.symmetric(
                                 vertical: 8, horizontal: 20),

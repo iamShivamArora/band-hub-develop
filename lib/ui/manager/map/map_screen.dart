@@ -3,13 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
-
-import 'package:map_picker/map_picker.dart';
 import 'package:location/location.dart' as Location;
+import 'package:map_picker/map_picker.dart';
 
 import '../../../widgets/elevated_btn.dart';
 
@@ -24,8 +22,8 @@ class _MapScreenState extends State<MapScreen> {
   Completer<GoogleMapController> _controller = Completer();
 
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+    target: LatLng(30.7333, 76.7794),
+    zoom: 10.4746,
   );
 
   TextEditingController searchController = TextEditingController();
@@ -40,8 +38,8 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     Timer(const Duration(seconds: 1), _getCurrentLocation);
-    _cameraPosition = const CameraPosition(
-        target: LatLng(37.42796133580664, -122.085749655962), zoom: 10.0);
+    _cameraPosition =
+        const CameraPosition(target: LatLng(30.7333, 76.7794), zoom: 10.0);
     super.initState();
   }
 
@@ -137,7 +135,7 @@ class _MapScreenState extends State<MapScreen> {
           CameraUpdate.newCameraPosition(
             CameraPosition(
               target: LatLng(position.latitude, position.longitude),
-              zoom: 18.0,
+              zoom: 10.0,
             ),
           ),
         );

@@ -209,7 +209,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                               ),
                                               AppText(
                                                 text: CommonFunctions()
-                                                    .getStatusType(snapshot
+                                                    .getEventStatusType(snapshot
                                                         .data!
                                                         .body[index]
                                                         .status),

@@ -45,6 +45,8 @@ class Body {
     required this.lng,
     required this.createdAt,
     required this.updatedAt,
+    required this.rateCount,
+    this.avgRating,
     required this.eventCreator,
     required this.eventImages,
     required this.eventBookings,
@@ -65,11 +67,13 @@ class Body {
   late final String lng;
   late final String createdAt;
   late final String updatedAt;
+  late final int rateCount;
+  late final double? avgRating;
   late final EventCreator eventCreator;
   late final List<EventImages> eventImages;
   late final List<EventBookings> eventBookings;
 
-  Body.fromJson(Map<String, dynamic> json){
+  Body.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     managerId = json['managerId'];
     name = json['name'];
@@ -86,9 +90,15 @@ class Body {
     lng = json['lng'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    rateCount = json['rateCount'];
+    avgRating = json['avgRating'];
     eventCreator = EventCreator.fromJson(json['eventCreator']);
-    eventImages = List.from(json['event_images']).map((e)=>EventImages.fromJson(e)).toList();
-    eventBookings = List.from(json['event_bookings']).map((e)=>EventBookings.fromJson(e)).toList();
+    eventImages = List.from(json['event_images'])
+        .map((e) => EventImages.fromJson(e))
+        .toList();
+    eventBookings = List.from(json['event_bookings'])
+        .map((e) => EventBookings.fromJson(e))
+        .toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -109,9 +119,11 @@ class Body {
     _data['lng'] = lng;
     _data['createdAt'] = createdAt;
     _data['updatedAt'] = updatedAt;
+    _data['rateCount'] = rateCount;
+    _data['avg_rating'] = avgRating;
     _data['eventCreator'] = eventCreator.toJson();
-    _data['event_images'] = eventImages.map((e)=>e.toJson()).toList();
-    _data['event_bookings'] = eventBookings.map((e)=>e.toJson()).toList();
+    _data['event_images'] = eventImages.map((e) => e.toJson()).toList();
+    _data['event_bookings'] = eventBookings.map((e) => e.toJson()).toList();
     return _data;
   }
 }

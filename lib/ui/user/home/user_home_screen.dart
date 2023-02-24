@@ -141,17 +141,26 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                       ]),
                                   child: Column(children: [
                                     InkWell(
-                                      onTap: () async{
-                                        await Get.toNamed(Routes.eventDetailScreen,
+                                      onTap: () async {
+                                        // await Get.toNamed(Routes.eventDetailScreen,
+                                        //     arguments: {
+                                        //       'isFromManager': false,
+                                        //       'eventId': snapshot
+                                        //           .data!.body[index].eventId
+                                        //           .toString()
+                                        //     });
+                                        //
+                                        //       setState(() {});
+
+                                        await Get.toNamed(
+                                            Routes.managerEventDetailScreen,
                                             arguments: {
-                                              'isFromManager': false,
                                               'eventId': snapshot
                                                   .data!.body[index].eventId
-                                                  .toString()
+                                                  .toString(),
+                                              'isFromCurrent': ''
                                             });
-
-                                              setState(() {});
-
+                                        setState(() {});
                                       },
                                       child: CommonFunctions().setNetworkImages(
                                           imageUrl: snapshot

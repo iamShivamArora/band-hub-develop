@@ -24,30 +24,33 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   callNextScreen() async {
-    var token = await getToken();
-    var d = await SharedPref().getPreferenceJson();
-    LoginResponseModel result = LoginResponseModel.fromJson(jsonDecode(d));
-    print(token);
-    Timer(const Duration(seconds: 2), () {
-      if (token.isEmpty) {
-        Get.offAllNamed(Routes.introScreen);
-      } else {
+    var token = await getToken() ?? "";
+
+    if (token.isNotEmpty) {
+      print(token);
+      var d = await SharedPref().getPreferenceJson();
+      LoginResponseModel result = LoginResponseModel.fromJson(jsonDecode(d));
+
+      Timer(const Duration(seconds: 2), () {
         if (result.body.type == 1) {
           if (result.body.location.isEmpty) {
-            Get.offAllNamed(Routes.setupProfileScreen, arguments: {
-              "userName": result.body.fullName,
-            });
+            SharedPref().setToken("");
+            Get.offAllNamed(Routes.introScreen);
           } else {
             Get.offAllNamed(Routes.userMainScreen);
           }
         } else {
           Get.offAllNamed(Routes.managerHomeScreen);
         }
-      }
-    });
+      });
+    } else {
+      Timer(const Duration(seconds: 2), () {
+        Get.offAllNamed(Routes.introScreen);
+      });
+    }
   }
 
-  Future<String> getToken() async {
+  Future<String?> getToken() async {
     String? tok = await SharedPref().getToken();
     if (tok != null) {
       return tok;

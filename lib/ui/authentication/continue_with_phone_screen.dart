@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:band_hub/models/success_response.dart';
 import 'package:band_hub/widgets/app_text.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 import '../../models/auth/login_response_model.dart';
 import '../../routes/Routes.dart';
@@ -18,7 +18,6 @@ import '../../widgets/country_picker/country.dart';
 import '../../widgets/custom_phone_text_field.dart';
 import '../../widgets/elevated_btn.dart';
 import '../../widgets/helper_widget.dart';
-import 'package:http/http.dart' as http;
 
 class ContinueWithPhoneScreen extends StatefulWidget {
   const ContinueWithPhoneScreen({Key? key}) : super(key: key);
@@ -31,7 +30,8 @@ class ContinueWithPhoneScreen extends StatefulWidget {
 class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
   TextEditingController controllerPhone = TextEditingController();
 
-  String countryCode = "+91";
+  String countryCode = "+1";
+  Country? selectedCountryData;
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +73,15 @@ class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
                         onChanged: (_) {
                           print(_.dialingCode);
                           countryCode = '+' + _.dialingCode;
+                          selectedCountryData = _;
+                          setState(() {});
                         },
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
-                        maxLength: 10,
-                        selectedCountry: Country.IN,
+                        maxLength: 12,
+                        selectedCountry: selectedCountryData != null
+                            ? selectedCountryData!
+                            : Country.US,
                       ),
                       Positioned(
                           bottom: 0,
@@ -117,7 +121,7 @@ class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
       'countryCode': countryCode,
       'type': "2",
       'device_type': Platform.isAndroid ? '1' : '2',
-      'device_token':' ',
+      'device_token': ' ',
     };
 
     print(body);
@@ -135,21 +139,20 @@ class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
         body: body);
 
     print(response.body);
-    LoginResponseModel? result = null;
+    // LoginResponseModel? result = null;
     try {
       Map<String, dynamic> res = json.decode(response.body);
 
-      result = LoginResponseModel.fromJson(res);
-      if (res['code'] != 200 || json == null) {
+      if (res['code'] != 200 || res == null) {
         String error = res['msg'];
         // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
         // Navigator.pop(ctx);
         print("scasd  " + error);
         throw new Exception(error);
       }
-
+      var result = LoginResponseModel.fromJson(res);
       EasyLoading.dismiss();
-      Fluttertoast.showToast(msg: result.msg, toastLength: Toast.LENGTH_SHORT);
+      Fluttertoast.showToast(msg: 'OTP send', toastLength: Toast.LENGTH_SHORT);
       Get.toNamed(Routes.verificationScreen, arguments: {
         "isFromLogin": true,
         "number": controllerPhone.text.trim().toString(),
@@ -157,20 +160,14 @@ class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
         "authKey": result.body.authKey,
         "loginResult": jsonEncode(result),
       });
-
     } catch (error) {
       EasyLoading.dismiss();
-      if (result != null) {
-        Fluttertoast.showToast(
-            msg: result.msg, toastLength: Toast.LENGTH_SHORT);
-        throw result.msg;
-      } else {
-        Fluttertoast.showToast(
-            msg: error.toString().substring(
-                error.toString().indexOf(':') + 1, error.toString().length),
-            toastLength: Toast.LENGTH_SHORT);
-        throw error.toString();
-      }
+
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
     }
   }
 

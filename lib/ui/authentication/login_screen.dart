@@ -292,24 +292,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ]),
                 ),
-                const SizedBox(
-                  width: 25,
+                Visibility(
+                  visible: Platform.isIOS,
+                  child: const SizedBox(
+                    width: 25,
+                  ),
                 ),
-                Container(
-                  height: 50,
-                  width: 50,
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset('assets/images/ic_apple.png'),
-                  decoration: BoxDecoration(
-                      color: AppColor.whiteColor,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColor.grayColor.withAlpha(70),
-                          blurRadius: 10.0,
-                          offset: const Offset(2, 2),
-                        ),
-                      ]),
+                Visibility(
+                  visible: Platform.isIOS,
+                  child: Container(
+                    height: 50,
+                    width: 50,
+                    padding: const EdgeInsets.all(12),
+                    child: Image.asset('assets/images/ic_apple.png'),
+                    decoration: BoxDecoration(
+                        color: AppColor.whiteColor,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColor.grayColor.withAlpha(70),
+                            blurRadius: 10.0,
+                            offset: const Offset(2, 2),
+                          ),
+                        ]),
+                  ),
                 ),
               ],
             )
@@ -390,7 +396,7 @@ class _LoginScreenState extends State<LoginScreen> {
     SharedPref().setPreferenceJson(jsonEncode(result));
     if (result.body.type == 1) {
       if (result.body.location.isEmpty) {
-        Get.offAllNamed(Routes.setupProfileScreen, arguments: {
+        Get.toNamed(Routes.setupProfileScreen, arguments: {
           "userName": result.body.fullName,
         });
       } else {

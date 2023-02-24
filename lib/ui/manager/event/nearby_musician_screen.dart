@@ -135,7 +135,10 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                               'userId': resultData!
                                                   .body[index].id
                                                   .toString(),
-                                              'eventId': eventId
+                                              'eventId': eventId,
+                                              'isInvited': resultData!
+                                                      .body[index].isInvited ==
+                                                  1
                                             });
                                         listingApi();
                                         setState(() {});
@@ -230,32 +233,40 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                                 const SizedBox(
                                                   height: 10,
                                                 ),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    showDeclineDialog(
-                                                        resultData!.body[index]
-                                                            .fullName,
-                                                        resultData!
-                                                            .body[index].id
-                                                            .toString());
-                                                  },
-                                                  child: Container(
-                                                    padding:
-                                                        const EdgeInsets.all(5),
+                                                resultData!.body[index]
+                                                            .isInvited ==
+                                                        0
+                                                    ? GestureDetector(
+                                                        onTap: () {
+                                                          showDeclineDialog(
+                                                              resultData!
+                                                                  .body[index]
+                                                                  .fullName,
+                                                              resultData!
+                                                                  .body[index]
+                                                                  .id
+                                                                  .toString());
+                                                        },
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets.all(5),
                                                     decoration: BoxDecoration(
                                                         color:
                                                             AppColor.appColor,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(5)),
-                                                    child: AppText(
-                                                      text: ' Send Invitation ',
-                                                      textSize: 8,
-                                                      textColor:
-                                                          AppColor.whiteColor,
-                                                    ),
-                                                  ),
-                                                )
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          5)),
+                                                          child: AppText(
+                                                            text:
+                                                                ' Send Invitation ',
+                                                            textSize: 8,
+                                                            textColor: AppColor
+                                                                .whiteColor,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : Container()
                                               ],
                                             )
                                           ],
@@ -275,9 +286,7 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
         connectivityResult == ConnectivityResult.wifi)) {
       throw new Exception('NO INTERNET CONNECTION');
     }
-    var body = {
-      'categoryId':catId
-    };
+    var body = {'categoryId': catId, 'eventId': eventId};
     var response = await http.put(
         Uri.parse(GlobalVariable.baseUrl + GlobalVariable.userListByCat),
         headers: await CommonFunctions().getHeader(),body: body);

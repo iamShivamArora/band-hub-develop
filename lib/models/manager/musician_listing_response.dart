@@ -61,7 +61,7 @@ class MusicianBody {
     required this.createdAt,
     required this.status,
     required this.updatedAt,
-
+    required this.isInvited,
   });
   late final int id;
   late final int type;
@@ -93,6 +93,7 @@ class MusicianBody {
   late final String createdAt;
   late final int status;
   late final String updatedAt;
+  late final int isInvited;
 
   MusicianBody.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -125,6 +126,7 @@ class MusicianBody {
     createdAt = json['createdAt'];
     status = json['status'];
     updatedAt = json['updatedAt'];
+    isInvited = json['isInvited'];
   }
 
   Map<String, dynamic> toJson() {
@@ -159,6 +161,7 @@ class MusicianBody {
     _data['createdAt'] = createdAt;
     _data['status'] = status;
     _data['updatedAt'] = updatedAt;
+    _data['isInvited'] = isInvited;
     return _data;
   }
 }

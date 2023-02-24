@@ -8,12 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 import '../../models/success_response.dart';
 import '../../routes/Routes.dart';
 import '../../util/common_funcations.dart';
 import '../../util/global_variable.dart';
-import 'package:http/http.dart' as http;
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({Key? key}) : super(key: key);
 
@@ -118,7 +118,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     } else if (controllerConfirmPassword.text.toString().trim().isEmpty) {
       return "Please confirm your password";
     } else if (controllerNewPassword.text != controllerConfirmPassword.text) {
-      return "Password and confirm password must match";
+      return "New password and confirm password must match";
     }else {
       return "";
     }

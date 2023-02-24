@@ -131,7 +131,7 @@ class SimplePhoneTf extends StatelessWidget {
                   hintText:
                       (hint ?? '').isNotEmpty ? capitalize(hint ?? '') : "",
                   hintStyle: TextStyle(
-                      color: AppColor.blackColor,
+                      color: AppColor.blackColor.withOpacity(.50),
                       fontWeight: FontWeight.w400,
                       fontSize: 13),
                   errorText: errorText,
@@ -145,7 +145,6 @@ class SimplePhoneTf extends StatelessWidget {
                         width: 40,
                         child: Center(
                           child: CountryPicker(
-
                             dense: false,
                             showFlag: false,
                             onChanged: onChanged,
