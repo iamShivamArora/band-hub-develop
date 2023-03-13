@@ -35,6 +35,7 @@ class CategoriesBody {
     required this.name,
     required this.type,
     required this.status,
+    required this.isapprove,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -43,6 +44,7 @@ class CategoriesBody {
   late final String name;
   late final String type;
   late final int status;
+  late final int isapprove;
   late final String createdAt;
   late final String updatedAt;
 
@@ -51,6 +53,7 @@ class CategoriesBody {
     name = json['name'];
     type = json['type'];
     status = json['status'];
+    isapprove = json['isapprove'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
   }
@@ -61,6 +64,7 @@ class CategoriesBody {
     _data['name'] = name;
     _data['type'] = type;
     _data['status'] = status;
+    _data['isapprove'] = isapprove;
     _data['createdAt'] = createdAt;
     _data['updatedAt'] = updatedAt;
     return _data;

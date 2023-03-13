@@ -36,6 +36,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String countryCode = "+1";
   Country? selectedCountryData;
 
+  FocusNode focusPhone = FocusNode();
+  FocusNode focusConfirmPassword = FocusNode();
+
   bool acceptTerms = false;
 
   File? imageFile;
@@ -87,7 +90,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         height: 150,
                         child: InkWell(
                           onTap: () {
-                            showImagePicker();
+                            if (!EasyLoading.isShow) {
+                              showImagePicker();
+                            }
                           },
                           child: Stack(children: [
                             ClipRRect(
@@ -131,14 +136,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ? ElevatedBtn(
                                     text: 'User',
                                     onTap: (() {
-                                      isSelectUser = true;
-                                      setState(() {});
+                                      if (!EasyLoading.isShow) {
+                                        isSelectUser = true;
+                                        setState(() {});
+                                      }
                                     }),
                                   )
                                 : ElevatedStrokeBtn(
                                     onTap: (() {
-                                      isSelectUser = true;
-                                      setState(() {});
+                                      if (!EasyLoading.isShow) {
+                                        isSelectUser = true;
+                                        setState(() {});
+                                      }
                                     }),
                                     text: "User",
                                   )),
@@ -171,6 +180,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     SimpleTf(
                       controller: controllerName,
                       title: "Full Name",
+                      onEditComplete: () {
+                        FocusScope.of(context).requestFocus(focusPhone);
+                      },
                       maxLength: 25,
                       action: TextInputAction.next,
                     ),
@@ -181,7 +193,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       controller: controllerNumber,
                       action: TextInputAction.next,
                       title: 'Phone Number',
-                      hint: 'Phone Number',
+                      hint: 'Enter Phone Number',
+                      focusNode: focusPhone,
                       onChanged: (_) {
                         countryCode = "+" + _.dialingCode;
                         selectedCountryData = _;
@@ -208,6 +221,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: SimpleTf(
                         controller: controllerAbout,
                         title: "About",
+                        action: TextInputAction.newline,
                         height: 100,
                         lines: 4,
                       ),
@@ -219,6 +233,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       controller: controllerPassword,
                       password: passwordView,
                       action: TextInputAction.next,
+                      onEditComplete: () {
+                        FocusScope.of(context)
+                            .requestFocus(focusConfirmPassword);
+                      },
                       title: "Password",
                       suffix: passwordView
                           ? 'assets/images/ic_p_view.png'
@@ -234,6 +252,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     SimpleTf(
                       controller: controllerConfirmPassword,
                       password: confirmPasswordView,
+                      focusNode: focusConfirmPassword,
                       action: TextInputAction.done,
                       title: "Confirm Password",
                       suffix: confirmPasswordView
@@ -249,8 +268,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     InkWell(
                       onTap: () {
-                        acceptTerms = !acceptTerms;
-                        setState(() {});
+                        if (!EasyLoading.isShow) {
+                          acceptTerms = !acceptTerms;
+                          setState(() {});
+                        }
                       },
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,25 +348,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ElevatedBtn(
                       text: 'Create Account',
                       onTap: (() {
-                        if (validation().isEmpty) {
-                          getOtpApi(context);
+                        if (!EasyLoading.isShow) {
+                          if (validation().isEmpty) {
+                            getOtpApi(context);
 
-                          // if (!isSelectUser) {
-                          //
-                          //   signUp(context, body);
-                          // } else {
-                          //   Get.toNamed(Routes.setupProfileScreen, arguments: {
-                          //     'bodySignup': body,
-                          //     'signUpImage': imageFile!.path
-                          //   });
-                          // }
-                        } else {
-                          Fluttertoast.showToast(msg: validation());
+                            // if (!isSelectUser) {
+                            //
+                            //   signUp(context, body);
+                            // } else {
+                            //   Get.toNamed(Routes.setupProfileScreen, arguments: {
+                            //     'bodySignup': body,
+                            //     'signUpImage': imageFile!.path
+                            //   });
+                            // }
+                          } else {
+                            Fluttertoast.showToast(msg: validation());
+                          }
+                          // Get.toNamed(Routes.setupProfileScreen, arguments: {
+                          //   'bodySignup': {"full_name": "sd"},
+                          //   'signUpImage':imageFile!.path
+                          // });
                         }
-                        // Get.toNamed(Routes.setupProfileScreen, arguments: {
-                        //   'bodySignup': {"full_name": "sd"},
-                        //   'signUpImage':imageFile!.path
-                        // });
                       }),
                     ),
                     const SizedBox(
@@ -361,7 +384,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         InkWell(
                           onTap: (() {
-                            Get.offAllNamed(Routes.logInScreen);
+                            if (!EasyLoading.isShow) {
+                              Get.offAllNamed(Routes.logInScreen);
+                            }
                           }),
                           child: AppText(
                             text: "Log in",

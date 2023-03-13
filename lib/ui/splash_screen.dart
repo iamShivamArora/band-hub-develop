@@ -63,10 +63,15 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
-    return Scaffold(
-        backgroundColor: AppColor.whiteColor,
-        body: Center(
-          child: Image.asset('assets/images/ic_logo.png', height: 180),
-        ));
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+          backgroundColor: AppColor.whiteColor,
+          body: Center(
+            child: Image.asset('assets/images/ic_logo.png', height: 180),
+          )),
+    );
   }
 }

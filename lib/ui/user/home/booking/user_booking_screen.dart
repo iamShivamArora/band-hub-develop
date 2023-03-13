@@ -196,10 +196,16 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                             ],
                                           ),
                                           Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Image.asset(
-                                                  'assets/images/ic_location_mark.png',
-                                                  height: 12),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 3.0),
+                                                child: Image.asset(
+                                                    'assets/images/ic_location_mark.png',
+                                                    height: 12),
+                                              ),
                                               Expanded(
                                                 child: Padding(
                                                   padding:
@@ -222,18 +228,18 @@ class _UserHomeScreenState extends State<UserBookingScreen> {
                                               AppText(
                                                 text: CommonFunctions()
                                                     .getEventStatusType(snapshot
-                                                        .data!
-                                                        .body[index]
-                                                        .event
-                                                        .status),
+                                                    .data!
+                                                    .body[index]
+                                                    .event
+                                                    .status),
                                                 textSize: 12,
                                                 fontWeight: FontWeight.w400,
                                                 textColor: CommonFunctions()
                                                     .getColorForStatus(snapshot
-                                                        .data!
-                                                        .body[index]
-                                                        .event
-                                                        .status),
+                                                    .data!
+                                                    .body[index]
+                                                    .event
+                                                    .status),
                                               ),
                                             ],
                                           ),

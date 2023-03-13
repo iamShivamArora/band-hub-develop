@@ -14,6 +14,7 @@ import '../../models/success_response.dart';
 import '../../routes/Routes.dart';
 import '../../util/common_funcations.dart';
 import '../../util/global_variable.dart';
+
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({Key? key}) : super(key: key);
 
@@ -29,6 +30,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   TextEditingController controllerPassword = TextEditingController();
   TextEditingController controllerNewPassword = TextEditingController();
   TextEditingController controllerConfirmPassword = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,15 +95,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 const SizedBox(
                   height: 30,
                 ),
-                ElevatedBtn(text: 'Update',onTap: (){
-                  if(validation().isEmpty){
-                    callApi(context);
-                  }
-                  else{
-                    Fluttertoast.showToast(msg: validation());
-                  }
-
-                },)
+                ElevatedBtn(
+                  text: 'Update',
+                  onTap: () {
+                    if (!EasyLoading.isShow) {
+                      if (validation().isEmpty) {
+                        callApi(context);
+                      } else {
+                        Fluttertoast.showToast(msg: validation());
+                      }
+                    }
+                  },
+                )
               ]),
             )));
   }
@@ -110,8 +115,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     FocusScope.of(context).requestFocus(FocusScopeNode());
     if (controllerPassword.text.trim().isEmpty) {
       return "Please enter password";
-    }
-    else if (controllerNewPassword.text.trim().isEmpty) {
+    } else if (controllerNewPassword.text.trim().isEmpty) {
       return "Please enter new password";
     } else if (controllerNewPassword.text.length < 6) {
       return "Please enter at least 6 characters in new password";
@@ -119,7 +123,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return "Please confirm your password";
     } else if (controllerNewPassword.text != controllerConfirmPassword.text) {
       return "New password and confirm password must match";
-    }else {
+    } else {
       return "";
     }
   }

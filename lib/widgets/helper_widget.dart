@@ -1,11 +1,12 @@
-import 'package:band_hub/widgets/elevated_btn.dart';
+import 'package:band_hub/widgets/app_color.dart';
+import 'package:band_hub/widgets/app_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+
 // import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:band_hub/widgets/app_color.dart';
-import 'package:band_hub/widgets/app_text.dart';
 import 'package:image_viewer/image_viewer.dart';
 
 class HelperWidget {
@@ -26,7 +27,11 @@ class HelperWidget {
               'assets/images/ic_back.png',
               height: 22,
             ),
-            onPressed: () => Get.back(),
+            onPressed: () {
+              if (!EasyLoading.isShow) {
+                Get.back();
+              }
+            },
           ),
         ),
         centerTitle: true,

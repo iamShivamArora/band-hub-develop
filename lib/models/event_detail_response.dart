@@ -47,6 +47,8 @@ class Body {
     required this.updatedAt,
     required this.rateCount,
     this.avgRating,
+    required this.category,
+    required this.isRev,
     required this.eventCreator,
     required this.eventImages,
     required this.eventBookings,
@@ -69,6 +71,8 @@ class Body {
   late final String updatedAt;
   late final int rateCount;
   late final double? avgRating;
+  late final String category;
+  late final int isRev;
   late final EventCreator eventCreator;
   late final List<EventImages> eventImages;
   late final List<EventBookings> eventBookings;
@@ -92,6 +96,8 @@ class Body {
     updatedAt = json['updatedAt'];
     rateCount = json['rateCount'];
     avgRating = json['avgRating'];
+    category = json['category'];
+    isRev = json['isRev'];
     eventCreator = EventCreator.fromJson(json['eventCreator']);
     eventImages = List.from(json['event_images'])
         .map((e) => EventImages.fromJson(e))
@@ -121,6 +127,8 @@ class Body {
     _data['updatedAt'] = updatedAt;
     _data['rateCount'] = rateCount;
     _data['avg_rating'] = avgRating;
+    _data['category'] = category;
+    _data['isRev'] = isRev;
     _data['eventCreator'] = eventCreator.toJson();
     _data['event_images'] = eventImages.map((e) => e.toJson()).toList();
     _data['event_bookings'] = eventBookings.map((e) => e.toJson()).toList();
@@ -161,6 +169,7 @@ class EventCreator {
     required this.status,
     required this.updatedAt,
   });
+
   late final int id;
   late final int type;
   late final String fullName;
@@ -171,7 +180,7 @@ class EventCreator {
   late final int otp;
   late final int emailOtp;
   late final int verifyOtp;
-  late final int categoryId;
+  late final String categoryId;
   late final int isProfileAdd;
   late final String email;
   late final String password;
@@ -347,17 +356,18 @@ class User {
     required this.lng,
     required this.categoryName,
   });
+
   late final int id;
   late final String fullName;
   late final String musicianName;
   late final String profileImage;
-  late final int categoryId;
+  late final String categoryId;
   late final String location;
   late final String lat;
   late final String lng;
   late final String categoryName;
 
-  User.fromJson(Map<String, dynamic> json){
+  User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     fullName = json['full_name'];
     musicianName = json['musician_name'];

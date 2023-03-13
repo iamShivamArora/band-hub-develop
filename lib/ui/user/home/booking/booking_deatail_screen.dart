@@ -63,10 +63,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               height: 2,
                             ),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Image.asset(
-                                    'assets/images/ic_location_mark.png',
-                                    height: 12),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 3.0),
+                                  child: Image.asset(
+                                      'assets/images/ic_location_mark.png',
+                                      height: 12),
+                                ),
                                 AppText(
                                   text: " New York",
                                   textSize: 12,

@@ -62,7 +62,10 @@ class MusicianBody {
     required this.status,
     required this.updatedAt,
     required this.isInvited,
+    this.distance,
+    required this.categries,
   });
+
   late final int id;
   late final int type;
   late final String fullName;
@@ -73,7 +76,7 @@ class MusicianBody {
   late final int otp;
   late final int emailOtp;
   late final int verifyOtp;
-  late final int categoryId;
+  late final List<String> categoryId;
   late final int isProfileAdd;
   late final String email;
   late final String password;
@@ -94,6 +97,8 @@ class MusicianBody {
   late final int status;
   late final String updatedAt;
   late final int isInvited;
+  late final double? distance;
+  late final List<Categries> categries;
 
   MusicianBody.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -106,7 +111,7 @@ class MusicianBody {
     otp = json['otp'];
     emailOtp = json['emailOtp'];
     verifyOtp = json['verify_otp'];
-    categoryId = json['category_id'];
+    categoryId = List.castFrom<dynamic, String>(json['category_id']);
     isProfileAdd = json['is_profile_add'];
     email = json['email'];
     password = json['password'];
@@ -127,6 +132,9 @@ class MusicianBody {
     status = json['status'];
     updatedAt = json['updatedAt'];
     isInvited = json['isInvited'];
+    distance = json['distance'];
+    categries =
+        List.from(json['categries']).map((e) => Categries.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -162,6 +170,54 @@ class MusicianBody {
     _data['status'] = status;
     _data['updatedAt'] = updatedAt;
     _data['isInvited'] = isInvited;
+    _data['distance'] = distance;
+    _data['categries'] = categries.map((e) => e.toJson()).toList();
+    return _data;
+  }
+}
+
+class Categries {
+  Categries({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.status,
+    required this.proid,
+    required this.isapprove,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  late final int id;
+  late final String name;
+  late final String type;
+  late final int status;
+  late final int proid;
+  late final int isapprove;
+  late final String createdAt;
+  late final String updatedAt;
+
+  Categries.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    type = json['type'];
+    status = json['status'];
+    proid = json['proid'];
+    isapprove = json['isapprove'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['id'] = id;
+    _data['name'] = name;
+    _data['type'] = type;
+    _data['status'] = status;
+    _data['proid'] = proid;
+    _data['isapprove'] = isapprove;
+    _data['createdAt'] = createdAt;
+    _data['updatedAt'] = updatedAt;
     return _data;
   }
 }

@@ -31,6 +31,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
   var userId = '';
   var eventId = '';
   var isInvited = false;
+  var category = "";
 
   @override
   void initState() {
@@ -87,7 +88,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                         height: 2,
                                       ),
                                       AppText(
-                                        text: snapshot.data!.body.categoryName,
+                                        text: category,
                                         textSize: 13,
                                         fontWeight: FontWeight.w400,
                                       ),
@@ -120,7 +121,9 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    Get.toNamed(Routes.userChatScreen);
+                                    if (!EasyLoading.isShow) {
+                                      Get.toNamed(Routes.userChatScreen);
+                                    }
                                   },
                                   child: Image.asset(
                                     'assets/images/ic_message_red.png',
@@ -134,15 +137,17 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                   visible: !isUser,
                                   child: GestureDetector(
                                     onTap: () async {
-                                      var success = await changeFavStatusApi(
-                                          context,
-                                          snapshot.data!.body.id.toString(),
-                                          snapshot.data!.body.isFav == 0
-                                              ? "1"
-                                              : "2");
+                                      if (!EasyLoading.isShow) {
+                                        var success = await changeFavStatusApi(
+                                            context,
+                                            snapshot.data!.body.id.toString(),
+                                            snapshot.data!.body.isFav == 0
+                                                ? "1"
+                                                : "2");
 
-                                      if (success) {
-                                        setState(() {});
+                                        if (success) {
+                                          setState(() {});
+                                        }
                                       }
                                     },
                                     child: snapshot.data!.body.isFav == 0
@@ -275,9 +280,7 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                                                                       left:
                                                                           5.0),
                                                               child: AppText(
-                                                                  text: CommonFunctions()
-                                                                      .timeAgoFormat(
-                                                                      snapshot
+                                                                  text: CommonFunctions().timeAgoFormat(snapshot
                                                                       .data!
                                                                       .body
                                                                       .ratingTo[
@@ -328,7 +331,9 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
                               child: ElevatedBtn(
                                 text: ' Send Invitation ',
                                 onTap: () {
-                                  sendInviteToUser(context, userId);
+                                  if (!EasyLoading.isShow) {
+                                    sendInviteToUser(context, userId);
+                                  }
                                 },
                               ),
                             )
@@ -372,6 +377,14 @@ class _MusicianDetailScreenState extends State<MusicianDetailScreen> {
         throw new Exception(error);
       }
       UserDetailResponse result = UserDetailResponse.fromJson(res);
+      category = "";
+      for (var item in result.body.categries) {
+        if (category.isEmpty) {
+          category = item.name;
+        } else {
+          category = category + ", " + item.name;
+        }
+      }
 
       return result;
     } catch (error) {

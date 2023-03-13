@@ -103,10 +103,12 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
         backgroundColor: AppColor.whiteColor,
         floatingActionButton: InkWell(
           onTap: () async {
-            await Get.toNamed(Routes.createEventScreen,
-                arguments: {"isEdit": false});
-            listingApi();
-            setState(() {});
+            if (!EasyLoading.isShow) {
+              await Get.toNamed(Routes.createEventScreen,
+                  arguments: {"isEdit": false});
+              listingApi();
+              setState(() {});
+            }
           },
           child: Image.asset(
             'assets/images/ic_red_plus.png',
@@ -130,7 +132,11 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         InkWell(
-                          onTap: () => _scaffoldKey.currentState!.openDrawer(),
+                          onTap: () {
+                            if (!EasyLoading.isShow) {
+                              _scaffoldKey.currentState!.openDrawer();
+                            }
+                          },
                           child: Container(
                               height: 35,
                               padding: const EdgeInsets.all(10),
@@ -145,8 +151,10 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                         ),
                         InkWell(
                           onTap: () async {
-                            await Get.toNamed(Routes.notificationScreen);
-                            setState(() {});
+                            if (!EasyLoading.isShow) {
+                              await Get.toNamed(Routes.notificationScreen);
+                              setState(() {});
+                            }
                           },
                           child: Container(
                               height: 40,
@@ -177,121 +185,125 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                     Expanded(
                       child: errorMsg.isNotEmpty
                           ? Center(
-                          child: AppText(
-                            text: errorMsg,
-                            fontWeight: FontWeight.w500,
-                            textSize: 16,
-                          ))
+                              child: AppText(
+                              text: errorMsg,
+                              fontWeight: FontWeight.w500,
+                              textSize: 16,
+                            ))
                           : loading
-                          ? Center(child: CommonFunctions().loadingCircle())
-                          : SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 220,
-                              width: Get.width,
-                              child: Stack(children: [
-                                PageView.builder(
-                                  itemCount: resultData!
-                                      .body.BannerList.length,
-                                  controller: controller,
-                                  onPageChanged: (value) {
-                                    setState(() {});
-                                  },
-                                  itemBuilder: (BuildContext context,
-                                      int itemIndex) {
-                                    return CommonFunctions()
-                                        .setNetworkImages(
-                                        imageUrl: resultData!
-                                            .body
-                                            .BannerList[itemIndex]
-                                            .bannerImage,
+                              ? Center(child: CommonFunctions().loadingCircle())
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
                                         height: 220,
-                                        width: MediaQuery.of(
-                                            Get.context!)
-                                            .size
-                                            .width,
-                                        circle: 15);
-                                  },
-                                ),
-                                resultData!.body.BannerList.length ==
-                                    1
-                                    ? Container()
-                                    : Align(
-                                    alignment:
-                                    Alignment.bottomCenter,
-                                    child: Container(
-                                      margin:
-                                      const EdgeInsets.all(
-                                          10),
-                                      child: SmoothPageIndicator(
-                                          controller: controller,
-                                          // PageController
-                                          count: resultData!.body
-                                              .BannerList.length,
-                                          effect: ScrollingDotsEffect(
-                                              activeDotColor:
-                                              AppColor
-                                                  .appColor,
-                                              dotColor: AppColor
-                                                  .grayColor
-                                                  .withOpacity(
-                                                  .50),
-                                              spacing: 5,
-                                              dotHeight: 7,
-                                              dotWidth: 7),
-                                          // your preferred effect
-                                          onDotClicked:
-                                              (index) {}),
-                                    )),
-                              ]),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        AppText(
-                                          text: "Events",
-                                          textSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        const Spacer(),
-                                        resultData!.body.EventsList
-                                            .length >=
-                                            3
-                                            ? InkWell(
-                                          onTap: () async {
-                                            await Get.toNamed(Routes
-                                                .viewAllEventsScreen);
-                                            listingApi();
-                                            setState(() {});
-                                          },
-                                          child: AppText(
-                                            text: "View All",
-                                            textSize: 12,
-                                            textColor: AppColor
-                                                .appColor,
-                                            fontWeight:
-                                            FontWeight.w600,
-                                            underline: true,
+                                        width: Get.width,
+                                        child: Stack(children: [
+                                          PageView.builder(
+                                            itemCount: resultData!
+                                                .body.BannerList.length,
+                                            controller: controller,
+                                            onPageChanged: (value) {
+                                              setState(() {});
+                                            },
+                                            itemBuilder: (BuildContext context,
+                                                int itemIndex) {
+                                              return CommonFunctions()
+                                                  .setNetworkImages(
+                                                      imageUrl: resultData!
+                                                          .body
+                                                          .BannerList[itemIndex]
+                                                          .bannerImage,
+                                                      height: 220,
+                                                      width: MediaQuery.of(
+                                                              Get.context!)
+                                                          .size
+                                                          .width,
+                                                      circle: 15);
+                                            },
                                           ),
-                                        )
-                                            : Container()
-                                      ],
-                                    ),
-                                    resultData!
-                                        .body.EventsList.isEmpty
-                                        ? Padding(
-                                      padding: EdgeInsets.only(
-                                          top: MediaQuery.of(
-                                              context)
-                                              .size
+                                          resultData!.body.BannerList.length ==
+                                                  1
+                                              ? Container()
+                                              : Align(
+                                                  alignment:
+                                                      Alignment.bottomCenter,
+                                                  child: Container(
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                            10),
+                                                    child: SmoothPageIndicator(
+                                                        controller: controller,
+                                                        // PageController
+                                                        count: resultData!.body
+                                                            .BannerList.length,
+                                                        effect: ScrollingDotsEffect(
+                                                            activeDotColor:
+                                                                AppColor
+                                                                    .appColor,
+                                                            dotColor: AppColor
+                                                                .grayColor
+                                                                .withOpacity(
+                                                                    .50),
+                                                            spacing: 5,
+                                                            dotHeight: 7,
+                                                            dotWidth: 7),
+                                                        // your preferred effect
+                                                        onDotClicked:
+                                                            (index) {}),
+                                                  )),
+                                        ]),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                      Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5),
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  AppText(
+                                                    text: "Events",
+                                                    textSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  const Spacer(),
+                                                  resultData!.body.EventsList
+                                                              .length >=
+                                                          3
+                                                      ? InkWell(
+                                                          onTap: () async {
+                                                            if (!EasyLoading
+                                                                .isShow) {
+                                                              await Get.toNamed(
+                                                                  Routes
+                                                                      .viewAllEventsScreen);
+                                                              listingApi();
+                                                              setState(() {});
+                                                            }
+                                                          },
+                                                          child: AppText(
+                                                            text: "View All",
+                                                            textSize: 12,
+                                                            textColor: AppColor
+                                                                .appColor,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            underline: true,
+                                                          ),
+                                                        )
+                                                      : Container()
+                                                ],
+                                              ),
+                                              resultData!
+                                                      .body.EventsList.isEmpty
+                                                  ? Padding(
+                                                      padding: EdgeInsets.only(
+                                                          top: MediaQuery.of(
+                                                                      context)
+                                                                  .size
                                                                   .height *
                                                               0.14),
                                                       child: Center(
@@ -340,13 +352,13 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                                                       InkWell(
                                                                         onTap:
                                                                             () async {
-                                                                          await Get.toNamed(
-                                                                              Routes.managerEventDetailScreen,
-                                                                              arguments: {
-                                                                                'eventId': resultData!.body.EventsList[index].id.toString()
-                                                                              });
-                                                                          setState(
-                                                                              () {});
+                                                                          if (!EasyLoading
+                                                                              .isShow) {
+                                                                            await Get.toNamed(Routes.managerEventDetailScreen, arguments: {
+                                                                              'eventId': resultData!.body.EventsList[index].id.toString()
+                                                                            });
+                                                                            setState(() {});
+                                                                          }
                                                                         },
                                                                         child:
                                                                             Container(
@@ -423,12 +435,14 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                                                                   children: [
                                                                                     InkWell(
                                                                                       onTap: () async {
-                                                                                        await Get.toNamed(Routes.createEventScreen, arguments: {
-                                                                                          "isEdit": true,
-                                                                                          'data': resultData!.body.EventsList[index]
-                                                                                        });
-                                                                                        listingApi();
-                                                                                        setState(() {});
+                                                                                        if (!EasyLoading.isShow) {
+                                                                                          await Get.toNamed(Routes.createEventScreen, arguments: {
+                                                                                            "isEdit": true,
+                                                                                            'data': resultData!.body.EventsList[index]
+                                                                                          });
+                                                                                          listingApi();
+                                                                                          setState(() {});
+                                                                                        }
                                                                                       },
                                                                                       child: SizedBox(
                                                                                         height: 20,
@@ -448,7 +462,11 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                                                                       color: AppColor.whiteColor,
                                                                                     ),
                                                                                     InkWell(
-                                                                                      onTap: () => showActionDialog(resultData!.body.EventsList[index].id.toString()),
+                                                                                      onTap: () {
+                                                                                        if (!EasyLoading.isShow) {
+                                                                                          showActionDialog(resultData!.body.EventsList[index].id.toString());
+                                                                                        }
+                                                                                      },
                                                                                       child: SizedBox(
                                                                                         height: 20,
                                                                                         child: AppText(
@@ -493,10 +511,10 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                                           }),
                                                     )
                                             ],
-                                ))
-                          ],
-                        ),
-                      ),
+                                          ))
+                                    ],
+                                  ),
+                                ),
                     )
                   ],
                 ),
@@ -597,8 +615,10 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                   buttonColor: AppColor.appColor,
                                   textColor: AppColor.whiteColor,
                                   onTap: () {
-                                    Get.back();
-                                    deleteEventApi(context, eventId);
+                                    if (!EasyLoading.isShow) {
+                                      Get.back();
+                                      deleteEventApi(context, eventId);
+                                    }
                                   },
                                   width: 240),
                             ),
@@ -611,7 +631,9 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                                   buttonColor: AppColor.blackColor,
                                   textColor: AppColor.blackColor,
                                   onTap: () {
-                                    Get.back();
+                                    if (!EasyLoading.isShow) {
+                                      Get.back();
+                                    }
                                   },
                                   width: 240),
                             )
@@ -718,7 +740,7 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
                     width: 25,
                   ),
                   AppText(
-                    text: "My Orders",
+                    text: "My Events",
                     textSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -775,7 +797,7 @@ class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
             InkWell(
               onTap: () {
                 Get.back();
-                Get.toNamed(Routes.providerMessageScreen);
+                Get.toNamed(Routes.userMessageScreen);
               },
               child: Row(
                 children: [

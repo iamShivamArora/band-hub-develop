@@ -38,111 +38,129 @@ class _FavouriteEventScreenState extends State<FavouriteEventScreen> {
                         fontWeight: FontWeight.w500,
                         textSize: 16,
                       ))
-                    :Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      primary: false,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: snapshot.data!.body.length,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                                  Get.toNamed(Routes.musicianDetailScreen,
-                                      arguments: {
-                                        'userId': snapshot
-                                            .data!.body[index].user.id
-                                            .toString(),
-                                        'eventId': "",
-                                        'isInvited': true
-                                      });
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            primary: false,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: snapshot.data!.body.length,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () {
+                                  if (!EasyLoading.isShow) {
+                                    Get.toNamed(Routes.musicianDetailScreen,
+                                        arguments: {
+                                          'userId': snapshot
+                                              .data!.body[index].user.id
+                                              .toString(),
+                                          'eventId': "",
+                                          'isInvited': true
+                                        });
+                                  }
                                 },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 20),
-                            decoration: BoxDecoration(
-                                color: AppColor.whiteColor,
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColor.grayColor.withAlpha(80),
-                                    blurRadius: 5.0,
-                                  ),
-                                ]),
-                            child: Column(
-                              children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      height: 220,
-                                      width: Get.width,
-                                      foregroundDecoration: BoxDecoration(
-                                        color:
-                                            AppColor.blackColor.withAlpha(20),
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      child: CommonFunctions().setNetworkImages(
-                                          imageUrl: snapshot.data!.body[index]
-                                              .user.profileImage,
-                                          circle: 15),
-                                    ),
-                                    Align(
-                                      alignment: Alignment.topRight,
-                                      child: GestureDetector(
-                                        onTap: (){
-                                          changeFavStatusApi(context, snapshot.data!.body[index].musicianId.toString());
-                                          },
-                                        child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              0, 20, 15, 0),
-                                          child: Image.asset(
-                                            'assets/images/ic_red_heart.png',
-                                            height: 40,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 20),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      AppText(
-                                        text: snapshot
-                                            .data!.body[index].user.fullName,
-                                        textSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      Row(children: [
-                                        Image.asset(
-                                          'assets/images/ic_location_mark.png',
-                                          height: 12,
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 5.0),
-                                          child: AppText(
-                                            text: snapshot.data!.body[index]
-                                                .user.location,
-                                            textSize: 12,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 20),
+                                  decoration: BoxDecoration(
+                                      color: AppColor.whiteColor,
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              AppColor.grayColor.withAlpha(80),
+                                          blurRadius: 5.0,
                                         ),
                                       ]),
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          Container(
+                                            height: 220,
+                                            width: Get.width,
+                                            foregroundDecoration: BoxDecoration(
+                                              color: AppColor.blackColor
+                                                  .withAlpha(20),
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            child: CommonFunctions()
+                                                .setNetworkImages(
+                                                    imageUrl: snapshot
+                                                        .data!
+                                                        .body[index]
+                                                        .user
+                                                        .profileImage,
+                                                    circle: 15),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.topRight,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                if (!EasyLoading.isShow) {
+                                                  changeFavStatusApi(
+                                                      context,
+                                                      snapshot.data!.body[index]
+                                                          .musicianId
+                                                          .toString());
+                                                }
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 20, 15, 0),
+                                                child: Image.asset(
+                                                  'assets/images/ic_red_heart.png',
+                                                  height: 40,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10, horizontal: 20),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            AppText(
+                                              text: snapshot.data!.body[index]
+                                                  .user.fullName,
+                                              textSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            Row(children: [
+                                              Image.asset(
+                                                'assets/images/ic_location_mark.png',
+                                                height: 12,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 5.0),
+                                                child: AppText(
+                                                  text: snapshot
+                                                      .data!
+                                                      .body[index]
+                                                      .user
+                                                      .location,
+                                                  textSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                            ]),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                );
+                              );
+                            }),
+                      );
               } else if (snapshot.hasError) {
                 return Center(
                     child: AppText(
@@ -196,11 +214,11 @@ class _FavouriteEventScreenState extends State<FavouriteEventScreen> {
       throw error.toString();
     }
   }
-  Future changeFavStatusApi(
-      BuildContext ctx, String id) async {
+
+  Future changeFavStatusApi(BuildContext ctx, String id) async {
     Map<String, String> data = {
       'id': id,
-      'status': "2"  //1= favourite , 2 = unfavourite
+      'status': "2" //1= favourite , 2 = unfavourite
     };
     EasyLoading.show(status: 'Loading');
     var connectivityResult = await (Connectivity().checkConnectivity());

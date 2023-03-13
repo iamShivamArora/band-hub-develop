@@ -1,5 +1,7 @@
 import 'package:band_hub/routes/RouteGenerator.dart';
 import 'package:band_hub/routes/Routes.dart';
+import 'package:band_hub/util/socket_caller.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -7,8 +9,10 @@ import 'package:get/get.dart';
 
 import 'widgets/app_color.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await socketCaller();
+  await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(const MyApp());
@@ -25,8 +29,6 @@ class MyApp extends StatelessWidget {
         statusBarColor: Colors.black,
         statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.light));
-
-
 
     return GetMaterialApp(
       builder: EasyLoading.init(),

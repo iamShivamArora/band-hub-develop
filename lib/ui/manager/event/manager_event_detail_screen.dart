@@ -128,10 +128,16 @@ class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
                                       height: 2,
                                     ),
                                     Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Image.asset(
-                                            'assets/images/ic_location_mark.png',
-                                            height: 12),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 3.0),
+                                          child: Image.asset(
+                                              'assets/images/ic_location_mark.png',
+                                              height: 12),
+                                        ),
                                         Expanded(
                                           child: Padding(
                                             padding: const EdgeInsets.only(
@@ -164,14 +170,19 @@ class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
                             height: 5,
                           ),
                           AppText(
-                            text: snapshot.data!.body.categoryId.toString(),
+                            text: "Category : " +
+                                snapshot.data!.body.category.toString(),
                             textSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
-                          AppText(
-                            text: snapshot.data!.body.description,
-                            textSize: 14,
-                            fontWeight: FontWeight.w400,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: AppText(
+                              text: "Description : " +
+                                  snapshot.data!.body.description,
+                              textSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                           const SizedBox(
                             height: 15,
@@ -467,14 +478,22 @@ class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
                                             ),
                                             Row(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.end,
                                               children: [
                                                 Expanded(
                                                   child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
-                                                      Image.asset(
-                                                          'assets/images/ic_location_mark.png',
-                                                          height: 12),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 3.0),
+                                                        child: Image.asset(
+                                                            'assets/images/ic_location_mark.png',
+                                                            height: 12),
+                                                      ),
                                                       Expanded(
                                                         child: Padding(
                                                           padding:
@@ -486,16 +505,16 @@ class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
                                                                 .data!
                                                                 .body
                                                                 .eventBookings[
-                                                                    index]
+                                                            index]
                                                                 .user
                                                                 .location,
                                                             textSize: 12,
                                                             maxlines: 2,
                                                             overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
+                                                            TextOverflow
+                                                                .ellipsis,
                                                             fontWeight:
-                                                                FontWeight.w400,
+                                                            FontWeight.w400,
                                                           ),
                                                         ),
                                                       ),
@@ -603,7 +622,39 @@ class _ManagerEventDetailScreenState extends State<ManagerEventDetailScreen> {
                                                               }),
                                                             ),
                                                           )
-                                                        : Container(),
+                                                        : snapshot
+                                                                    .data!
+                                                                    .body
+                                                                    .eventBookings[
+                                                                        index]
+                                                                    .status ==
+                                                                0
+                                                            ? AppText(
+                                                                text: 'Pending',
+                                                                textSize: 12,
+                                                                textColor:
+                                                                    Colors
+                                                                        .amber,
+                                                              )
+                                                            : Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .only(
+                                                                        left:
+                                                                            8.0),
+                                                                child: InkWell(
+                                                                  onTap: () {
+                                                                    Get.toNamed(
+                                                                        Routes
+                                                                            .userChatScreen);
+                                                                  },
+                                                                  child: Image
+                                                                      .asset(
+                                                                    'assets/images/ic_message_red.png',
+                                                                    height: 30,
+                                                                  ),
+                                                                ),
+                                                              ),
                                                 // const Spacer(),
                                                 // InkWell(
                                                 //   onTap: () {

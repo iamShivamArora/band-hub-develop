@@ -67,6 +67,7 @@ class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
                   Stack(
                     children: [
                       SimplePhoneTf(
+                        editabled: !EasyLoading.isShow,
                         controller: controllerPhone,
                         hint: 'Enter phone number',
                         title: '',
@@ -93,12 +94,14 @@ class _ContinueWithPhoneScreenState extends State<ContinueWithPhoneScreen> {
                                 heignt: 47,
                                 text: "Continue",
                                 onTap: () {
-                                  if (validation().isEmpty) {
-                                    callApi(context);
-                                  } else {
-                                    Fluttertoast.showToast(
-                                        msg: validation(),
-                                        toastLength: Toast.LENGTH_SHORT);
+                                  if (!EasyLoading.isShow) {
+                                    if (validation().isEmpty) {
+                                      callApi(context);
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: validation(),
+                                          toastLength: Toast.LENGTH_SHORT);
+                                    }
                                   }
                                 },
                               ),

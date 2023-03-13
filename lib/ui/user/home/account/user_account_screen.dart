@@ -14,6 +14,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../../../../util/common_funcations.dart';
 import '../../../../util/global_variable.dart';
 
@@ -95,7 +96,9 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
                           value: _switchValue,
                           onChanged: (value) {
                             setState(() {
-                              notificationStatusChange(context, value);
+                              if (!EasyLoading.isShow) {
+                                notificationStatusChange(context, value);
+                              }
                               // _switchValue = value;
                             });
                           },
@@ -119,7 +122,9 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
               ),
               InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.changePasswordScreen);
+                  if (!EasyLoading.isShow) {
+                    Get.toNamed(Routes.changePasswordScreen);
+                  }
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -157,8 +162,10 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
               ),
               InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.privacyTermsAboutScreen,
-                      arguments: {"isFrom": "Privacy Policy"});
+                  if (!EasyLoading.isShow) {
+                    Get.toNamed(Routes.privacyTermsAboutScreen,
+                        arguments: {"isFrom": "Privacy Policy"});
+                  }
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -196,8 +203,10 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
               ),
               InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.privacyTermsAboutScreen,
-                      arguments: {"isFrom": "Terms and Conditions"});
+                  if (!EasyLoading.isShow) {
+                    Get.toNamed(Routes.privacyTermsAboutScreen,
+                        arguments: {"isFrom": "Terms and Conditions"});
+                  }
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -235,8 +244,10 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
               ),
               InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.privacyTermsAboutScreen,
-                      arguments: {"isFrom": "About"});
+                  if (!EasyLoading.isShow) {
+                    Get.toNamed(Routes.privacyTermsAboutScreen,
+                        arguments: {"isFrom": "About"});
+                  }
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -320,7 +331,9 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
               // ),
               InkWell(
                 onTap: () {
-                  showLogoutDialog();
+                  if (!EasyLoading.isShow) {
+                    showLogoutDialog();
+                  }
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -407,7 +420,9 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
                             child: ElevatedStrokeBtn(
                           text: 'No',
                           onTap: () {
-                            Get.back();
+                            if (!EasyLoading.isShow) {
+                              Get.back();
+                            }
                           },
                         )),
                         const SizedBox(
@@ -419,8 +434,10 @@ class _UserAccountScreenState extends State<UserAccountScreen> {
                           buttonColor: AppColor.appColor,
                           textColor: AppColor.whiteColor,
                           onTap: () {
-                            Get.back();
-                            callApi(context);
+                            if (!EasyLoading.isShow) {
+                              Get.back();
+                              callApi(context);
+                            }
                           },
                         )),
                       ],

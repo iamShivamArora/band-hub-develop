@@ -115,11 +115,11 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
                               fontWeight: FontWeight.w500,
                               textSize: 16,
                             ))
-                          : GridView.builder(
+                          : ListView.builder(
                               shrinkWrap: true,
                               primary: false,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
+                              /* gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
@@ -128,76 +128,68 @@ class _MusicianCategoryScreenState extends State<MusicianCategoryScreen> {
                                         .size
                                         .width /
                                     (MediaQuery.of(context).size.height / 2.6),
-                              ),
+                              ),*/
                               itemCount: resultData!.body.length,
                               itemBuilder: (context, index) {
-                                return Stack(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Get.toNamed(Routes.nearbyMusicianScreen,
-                                            arguments: {
-                                              'catId': resultData!
-                                                  .body[index].id
-                                                  .toString(),
-                                              'eventId': eventId
-                                            });
-                                      },
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Get.toNamed(Routes.nearbyMusicianScreen,
+                                          arguments: {
+                                            'catId': resultData!.body[index].id
+                                                .toString(),
+                                            'eventId': eventId
+                                          });
+                                    },
+                                    child: Card(
+                                      elevation: 4,
+                                      color: AppColor.blackColor.withAlpha(40),
+                                      shadowColor:
+                                          AppColor.blackColor.withAlpha(40),
                                       child: Container(
-                                        height: Get.height,
-                                        width: Get.width,
-                                        foregroundDecoration: BoxDecoration(
-                                          color:
-                                              AppColor.blackColor.withAlpha(20),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          child: Image.asset(
-                                            'assets/images/ic_placeholder.png',
-                                            fit: BoxFit.cover,
-                                          ),
+                                        margin: const EdgeInsets.all(10),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 2.0),
+                                                child: AppText(
+                                                  text: resultData!
+                                                      .body[index].name,
+                                                  textSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                  textColor:
+                                                      AppColor.whiteColor,
+                                                ),
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              color: AppColor.whiteColor,
+                                            )
+                                            /*Row(children: [
+                                              Image.asset(
+                                                'assets/images/ic_location_mark.png',
+                                                height: 12,
+                                                color: AppColor.whiteColor,
+                                              ),
+                                              AppText(
+                                                text: " New York",
+                                                textSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                textColor: AppColor.whiteColor,
+                                              ),
+                                            ])*/
+                                          ],
                                         ),
                                       ),
                                     ),
-                                    Positioned.fill(
-                                      child: Align(
-                                        alignment: Alignment.bottomLeft,
-                                        child: Container(
-                                          margin: const EdgeInsets.all(10),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              AppText(
-                                                text: resultData!
-                                                    .body[index].name,
-                                                textSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                                textColor: AppColor.whiteColor,
-                                              ),
-                                              /*Row(children: [
-                                        Image.asset(
-                                          'assets/images/ic_location_mark.png',
-                                          height: 12,
-                                          color: AppColor.whiteColor,
-                                        ),
-                                        AppText(
-                                          text: " New York",
-                                          textSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          textColor: AppColor.whiteColor,
-                                        ),
-                                      ])*/
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
+                                  ),
                                 );
                               })
             ]),

@@ -39,6 +39,7 @@ import 'package:band_hub/ui/user/profile/user_profile_screen.dart';
 import 'package:band_hub/ui/user/user_main_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../ui/user/home/message/user_message_screen.dart';
 import 'Routes.dart';
 
 class RouteGenerator {
@@ -164,6 +165,9 @@ class RouteGenerator {
         break;
       case Routes.providerMessageScreen:
         widgetScreen = const ProviderMessageScreen();
+        break;
+      case Routes.userMessageScreen:
+        widgetScreen = const UserMessageScreen();
         break;
       case Routes.newProfileScreen:
         widgetScreen = const NewProfileScreen();

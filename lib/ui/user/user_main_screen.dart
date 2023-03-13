@@ -2,17 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:band_hub/ui/user/home/account/user_account_screen.dart';
+import 'package:band_hub/ui/user/home/booking/user_booking_screen.dart';
 import 'package:band_hub/ui/user/home/message/user_message_screen.dart';
 import 'package:band_hub/ui/user/home/user_home_screen.dart';
 import 'package:band_hub/util/sharedPref.dart';
 import 'package:band_hub/widgets/app_color.dart';
-import 'package:band_hub/widgets/helper_widget.dart';
-import 'package:band_hub/ui/user/home/booking/user_booking_screen.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../../routes/Routes.dart';
 import '../../util/common_funcations.dart';
 import '../../util/global_variable.dart';
@@ -75,8 +76,10 @@ class _UserMainScreenState extends State<UserMainScreen> {
                   insets: const EdgeInsets.fromLTRB(36.0, 0.0, 36.0, 67.5),
                   borderSide: BorderSide(width: 2.5, color: AppColor.appColor)),
               onTap: (value) {
-                index = value;
-                setState(() {});
+                if (!EasyLoading.isShow) {
+                  index = value;
+                  setState(() {});
+                }
               },
               // indicatorSize: TabBarIndicatorSize.label,
               labelPadding: EdgeInsets.zero,

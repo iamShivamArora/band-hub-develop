@@ -20,8 +20,38 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.692402550220-67e3i1ehhjf9ipn9de7uh6d415d0pppi</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb5210673452343064</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FacebookAppID</key>
+	<string>5210673452343064</string>
+	<key>FacebookClientToken</key>
+	<string>3d52f1b545324ceb532e94c81ceab925</string>
+	<key>FacebookDisplayName</key>
+	<string>Popil Tunes</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -48,9 +78,9 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open.</string>
 	<key>NSCameraUsageDescription</key>
-    <string>Band Hub camera description.</string>
+    <string>Band Hub want to access your camera to upload image in app.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Band Hub photos description.</string>
+    <string>Band Hub want to access your photos to upload image in app.</string>
 
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>

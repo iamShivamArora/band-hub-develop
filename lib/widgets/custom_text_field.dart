@@ -1,10 +1,10 @@
 // Flutter imports:
+import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:band_hub/widgets/app_color.dart';
 
 // Package imports:
 
@@ -30,6 +30,7 @@ class SimpleTf extends StatelessWidget {
   final double? sizedBoxWidth;
   final FocusNode? focusNode;
   final Function(String)? onChanged;
+  final Function()? onEditComplete;
   final bool? isMendotary;
   final double? width;
   final double? height;
@@ -55,6 +56,7 @@ class SimpleTf extends StatelessWidget {
       this.hint,
       this.vPadding,
       this.onChanged,
+      this.onEditComplete,
       this.lines,
       this.titleWidget,
       this.action,
@@ -127,6 +129,7 @@ class SimpleTf extends StatelessWidget {
               controller: controller,
               keyboardType: inputType,
               readOnly: readOnly,
+              onEditingComplete: onEditComplete,
               cursorColor: AppColor.blackColor,
               maxLines: lines ?? 1,
               obscureText: lines == null ? password == true : false,

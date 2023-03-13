@@ -110,16 +110,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   ),
                   !isFromLogin
                       ? AppText(
-                    text: 'Code is sent to $email',
-                    textSize: 16,
-                  )
+                          text: 'Code is sent to $email',
+                          textSize: 16,
+                        )
                       : Container(),
                   !isFromLogin
                       ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 40),
-                    child: PinCodeTextField(
-                      controller: controllerEmail,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 40),
+                          child: PinCodeTextField(
+                            controller: controllerEmail,
                             appContext: context,
                             onChanged: (value) {},
                             length: otpLength,
@@ -134,14 +134,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                               activeFillColor: AppColor.appColor,
                               activeColor: AppColor.appColor,
                               inactiveFillColor: AppColor.appColor,
-                        inactiveColor: AppColor.blackColor,
-                        selectedColor: AppColor.appColor,
-                      ),
-                      animationDuration: Duration(milliseconds: 300),
-                      onCompleted: (String
-                      verificationCode) async {}, // end onSubmit
-                    ),
-                  )
+                              inactiveColor: AppColor.blackColor,
+                              selectedColor: AppColor.appColor,
+                            ),
+                            animationDuration: Duration(milliseconds: 300),
+                            onCompleted: (String
+                                verificationCode) async {}, // end onSubmit
+                          ),
+                        )
                       : Container(),
                   const SizedBox(
                     height: 40,
@@ -155,7 +155,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          getOtpApi(context);
+                          if (!EasyLoading.isShow) {
+                            getOtpApi(context);
+                          }
                         },
                         child: AppText(
                           text: 'Request again',
@@ -171,18 +173,21 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   ElevatedBtn(
                     text: isFromLogin ? 'Verify' : 'Verify and Create Account',
                     onTap: () {
-                      // if (isFromLogin) {
-                      //   Get.offAllNamed(Routes.userMainScreen);
-                      // } else if (isFromUser) {
-                      //   Get.toNamed(Routes.setupProfileScreen);
-                      // } else {
-                      //   Get.offAllNamed(Routes.managerHomeScreen);
-                      // }
-                      if (validation().isEmpty) {
-                        validateOtpApi(context);
-                      } else {
-                        Fluttertoast.showToast(
-                            msg: validation(), toastLength: Toast.LENGTH_SHORT);
+                      if (!EasyLoading.isShow) {
+                        // if (isFromLogin) {
+                        //   Get.offAllNamed(Routes.userMainScreen);
+                        // } else if (isFromUser) {
+                        //   Get.toNamed(Routes.setupProfileScreen);
+                        // } else {
+                        //   Get.offAllNamed(Routes.managerHomeScreen);
+                        // }
+                        if (validation().isEmpty) {
+                          validateOtpApi(context);
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: validation(),
+                              toastLength: Toast.LENGTH_SHORT);
+                        }
                       }
                     },
                   ),
@@ -238,9 +243,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       EasyLoading.dismiss();
       Fluttertoast.showToast(
           msg: error.toString().substring(
-              error.toString().indexOf(':') + 1, error
-              .toString()
-              .length),
+              error.toString().indexOf(':') + 1, error.toString().length),
           toastLength: Toast.LENGTH_SHORT);
       print(error);
     }
@@ -254,10 +257,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0)),
               child: Container(
-                width: MediaQuery.of(context).size
-                    .width,
+                width: MediaQuery.of(context).size.width,
                 padding:
-                const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 decoration: BoxDecoration(
                     color: AppColor.whiteColor,
                     borderRadius: BorderRadius.circular(15)),
@@ -280,7 +282,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     ),
                     AppText(
                         text:
-                        "Congratulations, you have\ncompleted your registration!",
+                            "Congratulations, you have\ncompleted your registration!",
                         textColor: AppColor.blackColor,
                         textAlign: TextAlign.center,
                         textSize: 12,
@@ -292,37 +294,41 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       children: [
                         Expanded(
                             child: ElevatedBtn(
-                              text: 'Done',
-                              buttonColor: AppColor.appColor,
-                              textColor: AppColor.whiteColor,
-                              onTap: () {
-                                // Get.back();
-                                print(authKey);
-                            SharedPref().setToken(authKey);
-                            SharedPref().setPreferenceJson(jsonEncode(result));
-                            Get.offAllNamed(Routes.managerHomeScreen);
+                          text: 'Done',
+                          buttonColor: AppColor.appColor,
+                          textColor: AppColor.whiteColor,
+                          onTap: () {
+                            Get.back();
+                            print(authKey);
+                            // SharedPref().setToken(authKey);
+                            // SharedPref().setPreferenceJson(jsonEncode(result));
+                            // Get.offAllNamed(Routes.managerHomeScreen);
                           },
-                            )),
+                        )),
                       ],
                     )
                   ],
                 ),
               ),
-            ));
+            )).then((value) {
+      SharedPref().setToken(authKey);
+      SharedPref().setPreferenceJson(jsonEncode(result));
+      Get.offAllNamed(Routes.managerHomeScreen);
+    });
   }
 
   Future getOtpApi(BuildContext ctx) async {
     Map<dynamic, dynamic> body = isFromLogin
         ? {
-      'type': "2",
-      'phone': number,
-      'countryCode': countryCode,
-    }
+            'type': "2",
+            'phone': number,
+            'countryCode': countryCode,
+          }
         : {
-      'email': email,
-      'phone_number': number,
-      'countryCode': countryCode,
-    };
+            'email': email,
+            'phone_number': number,
+            'countryCode': countryCode,
+          };
     print(body);
 
     EasyLoading.show(status: 'Loading');
@@ -334,13 +340,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
     }
     var response = isFromLogin
         ? await http.put(
-        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.login),
-        headers: await CommonFunctions().getHeader(),
-        body: body)
+            Uri.parse(GlobalVariable.baseUrl + GlobalVariable.login),
+            headers: await CommonFunctions().getHeader(),
+            body: body)
         : await http.post(
-        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.sentOtp),
-        headers: await CommonFunctions().getHeader(),
-        body: body);
+            Uri.parse(GlobalVariable.baseUrl + GlobalVariable.sentOtp),
+            headers: await CommonFunctions().getHeader(),
+            body: body);
 
     print(response.body);
     // SuccessResponse? result = null;
@@ -360,9 +366,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
       Fluttertoast.showToast(
           msg: error.toString().substring(
-              error.toString().indexOf(':') + 1, error
-              .toString()
-              .length),
+              error.toString().indexOf(':') + 1, error.toString().length),
           toastLength: Toast.LENGTH_SHORT);
       throw error.toString();
     }
@@ -406,11 +410,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
         SharedPref().setToken(authKey);
         SharedPref().setPreferenceJson(loginResult);
         LoginResponseModel loginData =
-        LoginResponseModel.fromJson(jsonDecode(loginResult));
+            LoginResponseModel.fromJson(jsonDecode(loginResult));
         if (loginData.body.type == 1) {
           if (loginData.body.location.isEmpty) {
-            Get.offAllNamed(Routes.setupProfileScreen, arguments: {
-            "userName":loginData.body.fullName,
+            Get.back();
+            Get.toNamed(Routes.setupProfileScreen, arguments: {
+              "userName": loginData.body.fullName,
             });
           } else {
             Get.offAllNamed(Routes.userMainScreen);
@@ -426,9 +431,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
       Fluttertoast.showToast(
           msg: error.toString().substring(
-              error.toString().indexOf(':') + 1, error
-              .toString()
-              .length),
+              error.toString().indexOf(':') + 1, error.toString().length),
           toastLength: Toast.LENGTH_SHORT);
       throw error.toString();
     }

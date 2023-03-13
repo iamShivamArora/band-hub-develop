@@ -41,12 +41,56 @@ class CommonFunctions {
     return date;
   }
 
+  String maxLengthCheck(String value, int limit) {
+    if (value.length > limit) {
+      return value.replaceRange(limit, value.length, '....');
+    } else {
+      return value;
+    }
+  }
+
   void invalideAuth(res) {
     if (res['code'] == 403) {
       String error = res['msg'];
       Get.toNamed(Routes.logInScreen);
       throw new Exception(error);
     }
+  }
+
+  String getMsgTime(String gotDate) {
+    if (gotDate.contains("-")) {
+      //yyyy-MM-dd'T'HH:mm:ss.SSSZ
+      DateTime tempDate =
+          new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(gotDate);
+      String date = DateFormat("EEE HH:mm").format(tempDate);
+      return date;
+    } else {
+      String date = DateFormat("hh:mm a")
+          .format(DateTime.fromMillisecondsSinceEpoch(int.parse(gotDate)));
+      DateTime tempDate = new DateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+
+      return DateFormat("EEE HH:mm").format(tempDate);
+    }
+  }
+
+  String getGroupChatTime(String gotDate) {
+    //2023-01-31 19:43:20
+    if (gotDate.contains("-")) {
+      DateTime tempDate = new DateFormat("yyyy-MM-dd HH:mm:ss").parse(gotDate);
+      String date = DateFormat("hh:mm a").format(tempDate);
+      return date;
+    } else {
+      String date = DateFormat("hh:mm a")
+          .format(DateTime.fromMillisecondsSinceEpoch(int.parse(gotDate)));
+      return date;
+    }
+  }
+
+  String getPersonChatTime(String gotDate) {
+    DateTime tempDate =
+        new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(gotDate);
+    String date = DateFormat("hh:mm a").format(tempDate);
+    return date;
   }
 
   String changeServerDateDisplayFormat(String savedDateString) {
@@ -180,6 +224,7 @@ class CommonFunctions {
         }
     }
   }
+
   String zeroBeforeIfNeeded(String value) {
     if (value.length == 1) {
       return '0' + value;
@@ -201,12 +246,12 @@ class CommonFunctions {
 
   String timeAgoFormat(String savedDateString) {
     DateTime tempDate =
-    new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(savedDateString);
+        new DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(savedDateString);
     String date = DateFormat("dd-MM-yyyy hh:mm a").format(tempDate);
 
     // print(date);
     var dateTimeDuration =
-    DateTime.now().difference(DateTime.parse(savedDateString));
+        DateTime.now().difference(DateTime.parse(savedDateString));
     // var duration = Duration(minutes: 12);
     // print(DateTime.now().difference(DateTime.parse(savedDateString)));
     // print(DateTime.now().difference(DateTime.now().subtract(Duration(minutes: 12))));
@@ -214,12 +259,13 @@ class CommonFunctions {
     return GetTimeAgo.parse(DateTime.now().subtract(dateTimeDuration));
   }
 
-  Widget setNetworkImages({String imageUrl = "",
-    double circle = 0.0,
-    double width = 0.0,
-    double height = 0.0,
-    bool isUser = false,
-    BoxFit boxFit = BoxFit.cover}) {
+  Widget setNetworkImages(
+      {String imageUrl = "",
+      double circle = 0.0,
+      double width = 0.0,
+      double height = 0.0,
+      bool isUser = false,
+      BoxFit boxFit = BoxFit.cover}) {
     return ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(circle)),
         child: Image.network(
@@ -245,7 +291,7 @@ class CommonFunctions {
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor:
-                    AlwaysStoppedAnimation<Color>(AppColor.appColor),
+                        AlwaysStoppedAnimation<Color>(AppColor.appColor),
                   ),
                 ),
               );

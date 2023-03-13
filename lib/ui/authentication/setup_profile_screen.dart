@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:band_hub/models/success_response.dart';
 import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
@@ -82,10 +81,12 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                   children: [
                     InkWell(
                       onTap: () {
-                        if (imagesList.length < 5) {
-                          showImagePicker();
-                        } else {
-                          Fluttertoast.showToast(msg: "Max 5 image Allowed");
+                        if (!EasyLoading.isShow) {
+                          if (imagesList.length < 5) {
+                            showImagePicker();
+                          } else {
+                            Fluttertoast.showToast(msg: "Max 5 images allowed");
+                          }
                         }
                       },
                       child: Container(
@@ -152,8 +153,10 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                                         right: 0,
                                         child: InkWell(
                                           onTap: (() {
-                                            imagesList.removeAt(index);
-                                            setState(() {});
+                                            if (!EasyLoading.isShow) {
+                                              imagesList.removeAt(index);
+                                              setState(() {});
+                                            }
                                           }),
                                           child: const Icon(
                                             Icons.cancel,
@@ -289,12 +292,16 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                       height: 20,
                     ),
                     InkWell(
-                      onTap: () => Get.toNamed(Routes.mapScreen)!.then((value) {
-                        controllerLocation.text = value['location'] ?? "";
-                        lat = value['lat'] ?? "";
-                        lng = value['lng'] ?? "";
-                        setState(() {});
-                      }),
+                      onTap: () {
+                        if (!EasyLoading.isShow) {
+                          Get.toNamed(Routes.mapScreen)!.then((value) {
+                            controllerLocation.text = value['location'] ?? "";
+                            lat = value['lat'] ?? "";
+                            lng = value['lng'] ?? "";
+                            setState(() {});
+                          });
+                        }
+                      },
                       child: AbsorbPointer(
                         absorbing: true,
                         child: SimpleTf(
@@ -320,13 +327,15 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                     ),
                     ElevatedBtn(
                         onTap: (() {
-                          if (validation().isEmpty) {
-                            signUpProfile(context);
-                          } else {
-                            Fluttertoast.showToast(msg: validation());
-                          }
+                          if (!EasyLoading.isShow) {
+                            if (validation().isEmpty) {
+                              signUpProfile(context);
+                            } else {
+                              Fluttertoast.showToast(msg: validation());
+                            }
 
-                          // Get.toNamed(Routes.managerHomeScreen);
+                            // Get.toNamed(Routes.managerHomeScreen);
+                          }
                         }),
                         text: 'Submit'),
                     const SizedBox(
@@ -356,12 +365,12 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
                   children: [
                     AppText(
                         text: "Add Categories",
-                        maxlines: 30,
                         fontWeight: FontWeight.w400,
                         textSize: 13),
                     SimpleTf(
                       controller: controllerCat,
                       hint: "Enter Category",
+                      maxLength: 30,
                       inputType: TextInputType.text,
                       action: TextInputAction.done,
                     ),
@@ -567,9 +576,10 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
     if (catId.isNotEmpty) {
       body['categoryId'] = catId;
     }
-    // if (addedCatId.isNotEmpty) {
-    //   body['newCategory'] = addedCatId;
-    // }
+    if (addedCatId.isNotEmpty) {
+      body['myCat'] = addedCatId;
+    }
+    print(body);
     EasyLoading.show(status: 'Loading');
     var request = http.MultipartRequest("POST",
         Uri.parse(GlobalVariable.baseUrl + GlobalVariable.setUpProfile));
@@ -587,8 +597,9 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
 
       var result = await response.stream.bytesToString();
 
-      var res = SuccessResponse.fromJson(json.decode(result));
-      if (res.code == 200) {
+      var res = json.decode(result);
+      print(res);
+      if (res['code'] == 200) {
         // Navigator.pop(ctx);
         EasyLoading.dismiss();
         // SharedPref().setToken("");
@@ -597,7 +608,7 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
       } else {
         EasyLoading.dismiss();
         // Navigator.pop(ctx);
-        throw new Exception(res.msg);
+        throw new Exception(res['msg']);
       }
     } catch (error) {
       EasyLoading.dismiss();
@@ -613,74 +624,72 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
     showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => WillPopScope(
-              onWillPop: () async => false,
-              child: Dialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  decoration: BoxDecoration(
-                      color: AppColor.whiteColor,
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle_rounded,
-                          color: AppColor.greenColor, size: 80),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      AppText(
+        builder: (_) => Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                decoration: BoxDecoration(
+                    color: AppColor.whiteColor,
+                    borderRadius: BorderRadius.circular(15)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle_rounded,
+                        color: AppColor.greenColor, size: 80),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    AppText(
+                        text:
+                            // "Thanks",
+                            "Signup Successful",
+                        textColor: AppColor.blackColor,
+                        textAlign: TextAlign.center,
+                        textSize: 16,
+                        fontWeight: FontWeight.w500),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    AppText(
+                        text:
+                            // "Your signed in successfully done\nwaiting to admin approval.",
+                            "Congratulations, you have\ncompleted your registration!",
+                        textColor: AppColor.blackColor,
+                        textAlign: TextAlign.center,
+                        textSize: 12,
+                        fontWeight: FontWeight.w400),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: ElevatedBtn(
                           text:
-                              // "Thanks",
-                              "Signup Successful",
-                          textColor: AppColor.blackColor,
-                          textAlign: TextAlign.center,
-                          textSize: 16,
-                          fontWeight: FontWeight.w500),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      AppText(
-                          text:
-                              // "Your signed in successfully done\nwaiting to admin approval.",
-                              "Congratulations, you have\ncompleted your registration!",
-                          textColor: AppColor.blackColor,
-                          textAlign: TextAlign.center,
-                          textSize: 12,
-                          fontWeight: FontWeight.w400),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                              child: ElevatedBtn(
-                            text:
-                                // 'OK',
-                                'Done',
-                            buttonColor: AppColor.appColor,
-                            textColor: AppColor.whiteColor,
-                            onTap: () {
-                              // Get.back();
-                              Get.offAllNamed(Routes.userMainScreen);
-                              // Get.offAllNamed(Routes.logInScreen);
-                              // Get.toNamed(Routes.verificationScreen, arguments: {
-                              //   "isFromLogin": false,
-                              //   "userType": isSelectUser
-                              // });
-                            },
-                          )),
-                        ],
-                      )
-                    ],
-                  ),
+                              // 'OK',
+                              'Done',
+                          buttonColor: AppColor.appColor,
+                          textColor: AppColor.whiteColor,
+                          onTap: () {
+                            Get.back();
+                            // Get.offAllNamed(Routes.logInScreen);
+                            // Get.toNamed(Routes.verificationScreen, arguments: {
+                            //   "isFromLogin": false,
+                            //   "userType": isSelectUser
+                            // });
+                          },
+                        )),
+                      ],
+                    )
+                  ],
                 ),
               ),
-            ));
+            )).then((value) {
+      Get.offAllNamed(Routes.userMainScreen);
+    });
   }
 
   String validation() {
@@ -691,8 +700,7 @@ class _SetupProfilescreenState extends State<SetupProfileScreen> {
     /* else if (controllerMusicianName.text.trim().isEmpty) {
       return "Please enter musician name";
     }*/
-    else if (selectedCategoryList
-        .isEmpty /*&& selectedAddedCategories.isEmpty*/) {
+    else if (selectedCategoryList.isEmpty && selectedAddedCategories.isEmpty) {
       return "Please select at least one category";
     } else if (controllerLocation.text.trim().isEmpty) {
       return "Please select location";

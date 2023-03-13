@@ -1,12 +1,20 @@
+import 'dart:convert';
+
 import 'package:band_hub/routes/Routes.dart';
 import 'package:band_hub/widgets/app_color.dart';
 import 'package:band_hub/widgets/app_text.dart';
-import 'package:band_hub/widgets/elevated_btn.dart';
-import 'package:band_hub/widgets/elevated_stroke_btn.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+
+import '../../../util/common_funcations.dart';
+import '../../../util/global_variable.dart';
+import '../../../util/sharedPref.dart';
 
 class ManagerSettingsScreen extends StatefulWidget {
   const ManagerSettingsScreen({Key? key}) : super(key: key);
@@ -17,6 +25,17 @@ class ManagerSettingsScreen extends StatefulWidget {
 
 class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
   bool _switchValue = true;
+
+  getNotification() async {
+    _switchValue = (await SharedPref().getNotification())!;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    getNotification();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +52,9 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: Row(
                   children: [
                     Container(
@@ -64,19 +83,20 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
                         activeColor: AppColor.blackColor,
                         value: _switchValue,
                         onChanged: (value) {
-                          setState(() {
-                            _switchValue = value;
-                          });
+                          if (!EasyLoading.isShow) {
+                            notificationStatusChange(context, value);
+                          }
+                          // setState(() {});
                         },
                       ),
                     ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 15,
-                    )
+                    // const SizedBox(
+                    //   width: 5,
+                    // ),
+                    // const Icon(
+                    //   Icons.arrow_forward_ios,
+                    //   size: 15,
+                    // )
                   ],
                 ),
               ),
@@ -88,14 +108,16 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
             ),
             InkWell(
               onTap: () {
-                Get.toNamed(Routes.changePasswordScreen);
+                if (!EasyLoading.isShow) {
+                  Get.toNamed(Routes.changePasswordScreen);
+                }
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: Row(
                   children: [
                     Image.asset(
@@ -126,15 +148,17 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
             ),
             InkWell(
               onTap: () {
-                Get.toNamed(Routes.privacyTermsAboutScreen,
-                    arguments: {"isFrom": "Privacy Policy"});
+                if (!EasyLoading.isShow) {
+                  Get.toNamed(Routes.privacyTermsAboutScreen,
+                      arguments: {"isFrom": "Privacy Policy"});
+                }
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: Row(
                   children: [
                     Image.asset(
@@ -165,15 +189,17 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
             ),
             InkWell(
               onTap: () {
-                Get.toNamed(Routes.privacyTermsAboutScreen,
-                    arguments: {"isFrom": "Terms and Conditions"});
+                if (!EasyLoading.isShow) {
+                  Get.toNamed(Routes.privacyTermsAboutScreen,
+                      arguments: {"isFrom": "Terms and Conditions"});
+                }
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: Row(
                   children: [
                     Image.asset(
@@ -204,15 +230,17 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
             ),
             InkWell(
               onTap: () {
-                Get.toNamed(Routes.privacyTermsAboutScreen,
-                    arguments: {"isFrom": "About"});
+                if (!EasyLoading.isShow) {
+                  Get.toNamed(Routes.privacyTermsAboutScreen,
+                      arguments: {"isFrom": "About"});
+                }
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: Row(
                   children: [
                     Container(
@@ -251,14 +279,16 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
             ),
             InkWell(
               onTap: () {
-                Get.toNamed(Routes.favouriteEventScreen);
+                if (!EasyLoading.isShow) {
+                  Get.toNamed(Routes.favouriteEventScreen);
+                }
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: Row(
                   children: [
                     Image.asset(
@@ -368,5 +398,52 @@ class _ManagerSettingsScreenState extends State<ManagerSettingsScreen> {
             // ),
           ]),
         ));
+  }
+
+  Future notificationStatusChange(BuildContext ctx, bool value) async {
+    Map<dynamic, dynamic> body = {'status': value ? '1' : '2'};
+    print(body);
+    EasyLoading.show(status: 'Loading');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
+    var response = await http.put(
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.notificationsOnOff),
+        headers: await CommonFunctions().getHeader(),
+        body: body);
+
+    print(response.body);
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+      if (res['code'] == 401) {
+        String error = res['msg'];
+        Get.toNamed(Routes.logInScreen);
+        throw new Exception(error);
+      }
+      if (res['code'] != 200 || json == null) {
+        String error = res['msg'];
+        // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
+        // Navigator.pop(ctx);
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+      EasyLoading.dismiss();
+      _switchValue = !_switchValue;
+      SharedPref().setNotification(_switchValue);
+      Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+
+      setState(() {});
+      // return ApiSignUpDataModel.fromJson(json.decode(response.body));
+    } catch (error) {
+      EasyLoading.dismiss();
+
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
+    }
   }
 }

@@ -12,6 +12,7 @@ import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -84,7 +85,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       ])),
                   InkWell(
                       onTap: () {
-                        Get.toNamed(Routes.userProfileScreen);
+                        if (!EasyLoading.isShow) {
+                          Get.toNamed(Routes.userProfileScreen);
+                        }
                       },
                       child: userImage.isEmail
                           ? Image.asset(
@@ -109,179 +112,209 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               ),
             ),
             Expanded(
-              child: FutureBuilder<EventRequestsListingResponse>(
-                  future: eventListApi(context),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return snapshot.data!.body.isEmpty
-                          ? Center(
-                              child: AppText(
-                              text: "No active requests",
-                              fontWeight: FontWeight.w500,
-                              textSize: 16,
-                            ))
-                          : ListView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemCount: snapshot.data!.body.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                                  decoration: BoxDecoration(
-                                      color: AppColor.whiteColor,
-                                      borderRadius: BorderRadius.circular(15),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color:
-                                              AppColor.grayColor.withAlpha(80),
-                                          blurRadius: 10.0,
-                                          offset: const Offset(2, 2),
-                                        ),
-                                      ]),
-                                  child: Column(children: [
-                                    InkWell(
-                                      onTap: () async {
-                                        // await Get.toNamed(Routes.eventDetailScreen,
-                                        //     arguments: {
-                                        //       'isFromManager': false,
-                                        //       'eventId': snapshot
-                                        //           .data!.body[index].eventId
-                                        //           .toString()
-                                        //     });
-                                        //
-                                        //       setState(() {});
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {});
+                },
+                color: AppColor.appColor,
+                child: FutureBuilder<EventRequestsListingResponse>(
+                    future: eventListApi(context),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return snapshot.data!.body.isEmpty
+                            ? Center(
+                                child: AppText(
+                                text: "No active requests",
+                                fontWeight: FontWeight.w500,
+                                textSize: 16,
+                              ))
+                            : ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: snapshot.data!.body.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    margin: const EdgeInsets.fromLTRB(
+                                        20, 10, 20, 10),
+                                    decoration: BoxDecoration(
+                                        color: AppColor.whiteColor,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColor.grayColor
+                                                .withAlpha(80),
+                                            blurRadius: 10.0,
+                                            offset: const Offset(2, 2),
+                                          ),
+                                        ]),
+                                    child: Column(children: [
+                                      InkWell(
+                                        onTap: () async {
+                                          // await Get.toNamed(Routes.eventDetailScreen,
+                                          //     arguments: {
+                                          //       'isFromManager': false,
+                                          //       'eventId': snapshot
+                                          //           .data!.body[index].eventId
+                                          //           .toString()
+                                          //     });
+                                          //
+                                          //       setState(() {});
 
-                                        await Get.toNamed(
-                                            Routes.managerEventDetailScreen,
-                                            arguments: {
-                                              'eventId': snapshot
-                                                  .data!.body[index].eventId
-                                                  .toString(),
-                                              'isFromCurrent': ''
-                                            });
-                                        setState(() {});
-                                      },
-                                      child: CommonFunctions().setNetworkImages(
-                                          imageUrl: snapshot
-                                              .data!.body[index].event.image,
-                                          width: Get.width,
-                                          height: 200,
-                                          circle: 15),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10, horizontal: 15),
-                                      child: Column(children: [
-                                        Row(
-                                          children: [
-                                            AppText(
-                                              text: snapshot
-                                                  .data!.body[index].event.name,
-                                              textSize: 15,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            const Spacer(),
-                                            AppText(
-                                              text: "Date & Time",
-                                              textSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Image.asset(
-                                                'assets/images/ic_location_mark.png',
-                                                height: 12),
-                                            Expanded(
-                                              child: Padding(
+                                          if (!EasyLoading.isShow) {
+                                            await Get.toNamed(
+                                                Routes.managerEventDetailScreen,
+                                                arguments: {
+                                                  'eventId': snapshot
+                                                      .data!.body[index].eventId
+                                                      .toString(),
+                                                  'isFromCurrent': ''
+                                                });
+                                            setState(() {});
+                                          }
+                                        },
+                                        child: CommonFunctions()
+                                            .setNetworkImages(
+                                                imageUrl: snapshot.data!
+                                                    .body[index].event.image,
+                                                width: Get.width,
+                                                height: 200,
+                                                circle: 15),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10, horizontal: 15),
+                                        child: Column(children: [
+                                          Row(
+                                            children: [
+                                              AppText(
+                                                text: snapshot.data!.body[index]
+                                                    .event.name,
+                                                textSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              const Spacer(),
+                                              AppText(
+                                                text: "Date & Time",
+                                                textSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
                                                 padding: const EdgeInsets.only(
-                                                    right: 8.0),
-                                                child: AppText(
-                                                  text: " " +
-                                                      snapshot.data!.body[index]
-                                                          .event.location,
-                                                  maxlines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  textSize: 12,
-                                                  fontWeight: FontWeight.w500,
+                                                    top: 3.0),
+                                                child: Image.asset(
+                                                    'assets/images/ic_location_mark.png',
+                                                    height: 12),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 8.0),
+                                                  child: AppText(
+                                                    text: " " +
+                                                        snapshot
+                                                            .data!
+                                                            .body[index]
+                                                            .event
+                                                            .location,
+                                                    maxlines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    textSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            AppText(
-                                              text: CommonFunctions()
-                                                      .changeDateFormat(snapshot
-                                                          .data!
-                                                          .body[index]
-                                                          .event
-                                                          .startDate) +
-                                                  " | " +
-                                                  snapshot.data!.body[index]
-                                                      .event.startTime,
-                                              textSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Row(
-                                          children: [
-                                            const SizedBox(
-                                              width: 15,
-                                            ),
-                                            Expanded(
-                                                child: ElevatedBtn(
-                                              text: 'Accept',
-                                              onTap: (() {
-                                                eventAcceptRejectApi(
-                                                    context,
+                                              AppText(
+                                                text: CommonFunctions()
+                                                        .changeDateFormat(
+                                                            snapshot
+                                                                .data!
+                                                                .body[index]
+                                                                .event
+                                                                .startDate) +
+                                                    " | " +
                                                     snapshot.data!.body[index]
-                                                        .event.id
-                                                        .toString(),
-                                                    true);
-                                              }),
-                                              heignt: 45,
-                                            )),
-                                            const SizedBox(
-                                              width: 15,
-                                            ),
-                                            Expanded(
-                                                child: ElevatedStrokeBtn(
-                                              onTap: (() {
-                                                showDeclineDialog(snapshot
-                                                    .data!.body[index].event.id
-                                                    .toString());
-                                              }),
-                                              text: "Decline",
-                                              heignt: 45,
-                                            )),
-                                            const SizedBox(
-                                              width: 15,
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
-                                      ]),
-                                    )
-                                  ]),
-                                );
-                              });
-                    } else if (snapshot.hasError) {
-                      return Center(
-                          child: AppText(
-                        text: snapshot.error.toString(),
-                        fontWeight: FontWeight.w500,
-                        textSize: 16,
-                      ));
-                    }
-                    return Center(child: CommonFunctions().loadingCircle());
-                  }),
+                                                        .event.startTime,
+                                                textSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Row(
+                                            children: [
+                                              const SizedBox(
+                                                width: 15,
+                                              ),
+                                              Expanded(
+                                                  child: ElevatedBtn(
+                                                text: 'Accept',
+                                                onTap: (() {
+                                                  if (!EasyLoading.isShow) {
+                                                    eventAcceptRejectApi(
+                                                        context,
+                                                        snapshot
+                                                            .data!
+                                                            .body[index]
+                                                            .event
+                                                            .id
+                                                            .toString(),
+                                                        true);
+                                                  }
+                                                }),
+                                                heignt: 45,
+                                              )),
+                                              const SizedBox(
+                                                width: 15,
+                                              ),
+                                              Expanded(
+                                                  child: ElevatedStrokeBtn(
+                                                onTap: (() {
+                                                  if (!EasyLoading.isShow) {
+                                                    showDeclineDialog(snapshot
+                                                        .data!
+                                                        .body[index]
+                                                        .event
+                                                        .id
+                                                        .toString());
+                                                  }
+                                                }),
+                                                text: "Decline",
+                                                heignt: 45,
+                                              )),
+                                              const SizedBox(
+                                                width: 15,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 8,
+                                          ),
+                                        ]),
+                                      )
+                                    ]),
+                                  );
+                                });
+                      } else if (snapshot.hasError) {
+                        return Center(
+                            child: AppText(
+                          text: snapshot.error.toString(),
+                          fontWeight: FontWeight.w500,
+                          textSize: 16,
+                        ));
+                      }
+                      return Center(child: CommonFunctions().loadingCircle());
+                    }),
+              ),
             )
           ],
         ));
@@ -394,12 +427,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       return result;
     } catch (error) {
       // EasyLoading.dismiss();
-        Fluttertoast.showToast(
-            msg: error.toString().substring(
-                error.toString().indexOf(':') + 1, error.toString().length),
-            toastLength: Toast.LENGTH_SHORT);
-        throw error.toString();
-
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
     }
   }
 

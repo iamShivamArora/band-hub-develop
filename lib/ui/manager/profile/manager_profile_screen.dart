@@ -125,13 +125,16 @@ class _ManagerProfileScreenState extends State<ManagerProfileScreen> {
                             ],
                           ),
                         ),
-                        InkWell(
-                          onTap: () {
-                            Get.toNamed(Routes.userChatScreen);
-                          },
-                          child: Image.asset(
-                            'assets/images/ic_message_red.png',
-                            height: 35,
+                        Visibility(
+                          visible: eventId.isNotEmpty,
+                          child: InkWell(
+                            onTap: () {
+                              Get.toNamed(Routes.userChatScreen);
+                            },
+                            child: Image.asset(
+                              'assets/images/ic_message_red.png',
+                              height: 35,
+                            ),
                           ),
                         ),
                       ],
@@ -139,28 +142,31 @@ class _ManagerProfileScreenState extends State<ManagerProfileScreen> {
                     const SizedBox(
                       height: 25,
                     ),
-                    Row(
-                      children: [
-                        AppText(
-                          text: "Reviews",
-                          textSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        const Spacer(),
-                        Visibility(
-                          visible: false,
-                          child: InkWell(
-                            onTap: () => Get.toNamed(Routes.reviewScreen),
-                            child: AppText(
-                              text: "View All",
-                              textSize: 12,
-                              underline: true,
-                              textColor: AppColor.appColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    snapshot.data!.body.ratingTo.isNotEmpty
+                        ? Row(
+                            children: [
+                              AppText(
+                                text: "Reviews",
+                                textSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              const Spacer(),
+                              Visibility(
+                                visible:
+                                    snapshot.data!.body.ratingTo.length > 3,
+                                child: InkWell(
+                                  onTap: () => Get.toNamed(Routes.reviewScreen),
+                                  child: AppText(
+                                    text: "View All",
+                                    textSize: 12,
+                                    underline: true,
+                                    textColor: AppColor.appColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Container(),
                     const SizedBox(
                       height: 10,
                     ),

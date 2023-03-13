@@ -25,7 +25,7 @@ class SimplePhoneTf extends StatelessWidget {
   final double? sizedBoxWidth;
   final Function(Country) onChanged;
   final Country selectedCountry;
-
+  final FocusNode? focusNode;
   final bool? isMendotary;
   final double? width;
   final onSuffixTap;
@@ -49,6 +49,7 @@ class SimplePhoneTf extends StatelessWidget {
       this.hint,
       this.vPadding,
       //  this.onChanged,
+      this.focusNode,
       this.lines,
       this.titleWidget,
       this.action,
@@ -115,6 +116,7 @@ class SimplePhoneTf extends StatelessWidget {
               obscureText: lines == null ? password == true : false,
               validator: validator,
               maxLength: maxLength,
+              focusNode: focusNode,
               enabled: editabled ?? true,
               textInputAction: action ?? TextInputAction.done,
               inputFormatters: [

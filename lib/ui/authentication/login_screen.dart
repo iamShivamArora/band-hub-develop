@@ -15,9 +15,13 @@ import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+import '../../network/GoogleSignInProvider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -29,7 +33,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool passwordView = true;
   bool rememberMe = false;
-
+  FacebookLogin facebookLogin = FacebookLogin();
   TextEditingController controllerEmail = TextEditingController();
   TextEditingController controllerPassword = TextEditingController();
 
@@ -111,8 +115,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? 'assets/images/ic_p_view.png'
                   : 'assets/images/ic_p_hide.png',
               onSuffixTap: () {
-                passwordView = !passwordView;
-                setState(() {});
+                if (!EasyLoading.isShow) {
+                  passwordView = !passwordView;
+                  setState(() {});
+                }
               },
             ),
             const SizedBox(
@@ -165,7 +171,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Spacer(),
                 InkWell(
                   onTap: () {
-                    Get.toNamed(Routes.forgotPasswordScreen);
+                    if (!EasyLoading.isShow) {
+                      Get.toNamed(Routes.forgotPasswordScreen);
+                    }
                   },
                   child: AppText(
                     text: "Forgot password?",
@@ -180,10 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             ElevatedBtn(
               onTap: (() async {
-                if (validation().isEmpty) {
-                  await callApi(context);
-                } else {
-                  Fluttertoast.showToast(msg: validation());
+                if (!EasyLoading.isShow) {
+                  if (validation().isEmpty) {
+                    await callApi(context);
+                  } else {
+                    Fluttertoast.showToast(msg: validation());
+                  }
                 }
               }),
               text: 'Log In',
@@ -194,7 +204,9 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedStrokeBtn(
               text: 'Continue with Phone',
               onTap: (() {
-                Get.toNamed(Routes.continueWithPhoneScreen);
+                if (!EasyLoading.isShow) {
+                  Get.toNamed(Routes.continueWithPhoneScreen);
+                }
               }),
             ),
             const SizedBox(
@@ -210,7 +222,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 InkWell(
                   onTap: (() {
-                    Get.toNamed(Routes.signUpScreen);
+                    if (!EasyLoading.isShow) {
+                      Get.toNamed(Routes.signUpScreen);
+                    }
                   }),
                   child: AppText(
                     text: "Sign up",
@@ -257,54 +271,15 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  height: 50,
-                  width: 50,
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset('assets/images/ic_google.png'),
-                  decoration: BoxDecoration(
-                      color: AppColor.whiteColor,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColor.grayColor.withAlpha(70),
-                          blurRadius: 10.0,
-                          offset: const Offset(2, 2),
-                        ),
-                      ]),
-                ),
-                const SizedBox(
-                  width: 25,
-                ),
-                Container(
-                  height: 50,
-                  width: 50,
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset('assets/images/ic_fb.png'),
-                  decoration: BoxDecoration(
-                      color: AppColor.whiteColor,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColor.grayColor.withAlpha(70),
-                          blurRadius: 10.0,
-                          offset: const Offset(2, 2),
-                        ),
-                      ]),
-                ),
-                Visibility(
-                  visible: Platform.isIOS,
-                  child: const SizedBox(
-                    width: 25,
-                  ),
-                ),
-                Visibility(
-                  visible: Platform.isIOS,
+                InkWell(
+                  onTap: () {
+                    googleClick();
+                  },
                   child: Container(
                     height: 50,
                     width: 50,
                     padding: const EdgeInsets.all(12),
-                    child: Image.asset('assets/images/ic_apple.png'),
+                    child: Image.asset('assets/images/ic_google.png'),
                     decoration: BoxDecoration(
                         color: AppColor.whiteColor,
                         borderRadius: BorderRadius.circular(10),
@@ -315,6 +290,61 @@ class _LoginScreenState extends State<LoginScreen> {
                             offset: const Offset(2, 2),
                           ),
                         ]),
+                  ),
+                ),
+                const SizedBox(
+                  width: 25,
+                ),
+                InkWell(
+                  onTap: () {
+                    //facebook
+                    fbClick();
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 50,
+                    padding: const EdgeInsets.all(12),
+                    child: Image.asset('assets/images/ic_fb.png'),
+                    decoration: BoxDecoration(
+                        color: AppColor.whiteColor,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColor.grayColor.withAlpha(70),
+                            blurRadius: 10.0,
+                            offset: const Offset(2, 2),
+                          ),
+                        ]),
+                  ),
+                ),
+                Visibility(
+                  visible: Platform.isIOS,
+                  child: const SizedBox(
+                    width: 25,
+                  ),
+                ),
+                Visibility(
+                  visible: Platform.isIOS,
+                  child: InkWell(
+                    onTap: () {
+                      appleClick();
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      padding: const EdgeInsets.all(12),
+                      child: Image.asset('assets/images/ic_apple.png'),
+                      decoration: BoxDecoration(
+                          color: AppColor.whiteColor,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColor.grayColor.withAlpha(70),
+                              blurRadius: 10.0,
+                              offset: const Offset(2, 2),
+                            ),
+                          ]),
+                    ),
                   ),
                 ),
               ],
@@ -420,5 +450,91 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       return "";
     }
+  }
+
+  googleClick() async {
+    GoogleSignInProvider googleSign = GoogleSignInProvider();
+    await googleSign.googleLogin();
+    // String? token = await FirebaseMessaging.instance.getToken();
+    // print('FCM ----  ' + token!);
+    // Fluttertoast.showToast(msg: googleSign.user.id);
+    print(googleSign.user.displayName);
+    if (googleSign.user != null) {
+      Map<dynamic, dynamic> body = {
+        'social_id': googleSign.user.id,
+        'social_type': '1',
+        'email': googleSign.user.email,
+        'name': googleSign.user.displayName,
+        // 'image': googleSign.user.photoUrl,
+        'device_token': "",
+        if (Platform.isAndroid) 'device_type': '1' else 'device_type': '2',
+      };
+      // welcomeViewModel.socialLoginApi(context, loader, body);
+    } else {
+      Fluttertoast.showToast(msg: "Error occur");
+    }
+  }
+
+  fbClick() async {
+    final result = await facebookLogin.logIn(permissions: [
+      FacebookPermission.email,
+      FacebookPermission.publicProfile
+    ]);
+
+    if (result.status == FacebookLoginStatus.success) {
+      print(result.accessToken!.token);
+      final token = result.accessToken!.token;
+      final graphResponse = await http.get(Uri.parse(
+          'https://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=${token}'));
+      final profile = jsonDecode(graphResponse.body);
+      print(profile);
+      print(profile["picture"]["data"]["url"]);
+      print(profile["name"]);
+      print(profile["email"]);
+
+      // String? fcm = await FirebaseMessaging.instance.getToken();
+      // print('FCM ----  ' + fcm!);
+      //print(profile["picture"]["data"]["url"]);   // profileImage
+      Map<dynamic, dynamic> body = {
+        'social_id': profile["id"],
+        'social_type': '1',
+        'email': profile["email"],
+        'name': profile["name"],
+        // 'image': profile["picture"]["data"]["url"],
+        'device_token': "",
+        if (Platform.isAndroid) 'device_type': '1' else 'device_type': '2',
+      };
+      facebookLogin.logOut();
+      // welcomeViewModel.socialLoginApi(context, loader, body);
+    } else if (result.status == FacebookLoginStatus.error) {
+      print(result.error);
+    } else {
+      print(result.error);
+    }
+  }
+
+  appleClick() async {
+    final credentials = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+    var name = credentials.givenName == null ? "" : credentials.givenName;
+    var email = credentials.email == null ? "Apple Login" : credentials.email;
+    var social_id = credentials.userIdentifier;
+    print(credentials);
+
+    // String? fcm = await FirebaseMessaging.instance.getToken();
+    // print('FCM ----  ' + fcm!);
+
+    Map<dynamic, dynamic> body = {
+      'social_id': social_id,
+      'social_type': '3',
+      'email': email,
+      'name': name,
+      'device_token': "",
+      if (Platform.isAndroid) 'device_type': '1' else 'device_type': '2',
+    };
+    // welcomeViewModel.socialLoginApi(context, loader, body);
   }
 }

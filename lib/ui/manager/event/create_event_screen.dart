@@ -8,6 +8,7 @@ import 'package:band_hub/widgets/custom_text_field.dart';
 import 'package:band_hub/widgets/elevated_btn.dart';
 import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -34,12 +35,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String category = 'Select';
   String categoryId = '';
   String eventId = '';
-  List<String> imagesList = [];
+  List<EventImagesModel> imagesList = [];
   bool isFromEdit = false;
   int selectedTime = 0;
   String lat = '';
   String lng = '';
   DateTime selectedDate = DateTime(2023);
+  DateTime selectedEndDate = DateTime(2023);
+
+  List<String> deleteImages = [];
 
   TextEditingController controllerName = TextEditingController();
   TextEditingController controllerDes = TextEditingController();
@@ -77,7 +81,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       lng = eventData!.lng;
       categoryId = eventData!.categoryId.toString();
       eventData!.eventImages.forEach((element) {
-        imagesList.add(element.images);
+        imagesList.add(EventImagesModel(element.id.toString(), element.images));
       });
     }
   }
@@ -113,7 +117,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             InkWell(
-              onTap: () => showImagePicker(),
+              onTap: () {
+                if (imagesList.length < 5) {
+                  showImagePicker();
+                } else {
+                  Fluttertoast.showToast(msg: "Max 5 images allowed");
+                }
+              },
               child: Container(
                   margin: const EdgeInsets.only(top: 3),
                   height: 210,
@@ -121,6 +131,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   decoration: BoxDecoration(
                       color: AppColor.whiteColor,
                       borderRadius: BorderRadius.circular(10),
+                      image: imagesList.isNotEmpty
+                          ? imagesList[0].img.contains(GlobalVariable.imageUrl)
+                              ? DecorationImage(
+                                  image: NetworkImage(imagesList[0].img),
+                                  fit: BoxFit.cover)
+                              : DecorationImage(
+                                  image: FileImage(File(imagesList[0].img)),
+                                  fit: BoxFit.cover)
+                          : null,
                       boxShadow: [
                         BoxShadow(
                           color: AppColor.grayColor.withAlpha(70),
@@ -160,9 +179,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                               Row(
                                 children: [
                                   imagesList[index]
+                                          .img
                                           .contains(GlobalVariable.imageUrl)
                                       ? CommonFunctions().setNetworkImages(
-                                          imageUrl: imagesList[index],
+                                      imageUrl: imagesList[index].img,
                                           circle: 5,
                                           height: 55,
                                           width: 65,
@@ -171,7 +191,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                           borderRadius:
                                               BorderRadius.circular(5),
                                           child: Image.file(
-                                            File(imagesList[index]),
+                                            File(imagesList[index].img),
                                             height: 55,
                                             fit: BoxFit.cover,
                                             width: 65,
@@ -182,23 +202,41 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                                   ),
                                 ],
                               ),
-                              imagesList[index]
-                                      .contains(GlobalVariable.imageUrl)
-                                  ? Container()
-                                  : Positioned(
-                                      right: 0,
-                                      child: InkWell(
-                                        onTap: (() {
-                                          imagesList.removeAt(index);
-                                          setState(() {});
-                                        }),
-                                        child: const Icon(
-                                          Icons.cancel,
-                                          size: 20,
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    )
+                              Positioned(
+                                right: 0,
+                                child: InkWell(
+                                  onTap: (() async {
+                                    if (imagesList[index]
+                                        .img
+                                        .contains(GlobalVariable.imageUrl)) {
+                                      if (imagesList.length == 1) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                'Atleast one event images is required');
+                                      } else {
+                                        deleteImages.add(imagesList[index].id);
+
+                                        imagesList.removeAt(index);
+                                        setState(() {});
+                                      }
+                                    } else {
+                                      if (imagesList.length == 1) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                'Atleast one event images is required');
+                                      } else {
+                                        imagesList.removeAt(index);
+                                        setState(() {});
+                                      }
+                                    }
+                                  }),
+                                  child: const Icon(
+                                    Icons.cancel,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              )
                             ],
                           );
                         }),
@@ -276,11 +314,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             ),
             InkWell(
               onTap: () {
-                _showDatePicker(true);
+                if (!isFromEdit) {
+                  _showDatePicker(true);
+                }
               },
               child: AbsorbPointer(
                 absorbing: true,
                 child: SimpleTf(
+                  editabled: !isFromEdit,
                   controller: controllerStartDate,
                   title: "Event Start Date",
                   hintWithSelected: true,
@@ -292,11 +333,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             ),
             InkWell(
               onTap: () {
-                _showDatePicker(false);
+                if (!isFromEdit) {
+                  _showDatePicker(false);
+                }
               },
               child: AbsorbPointer(
                 absorbing: true,
                 child: SimpleTf(
+                  editabled: !isFromEdit,
                   controller: controllerEndDate,
                   title: "Event End Date",
                   hintWithSelected: true,
@@ -307,10 +351,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               height: 20,
             ),
             InkWell(
-              onTap: () => _selectTime(true),
+              onTap: () {
+                if (!isFromEdit) {
+                  _selectTime(true);
+                }
+              },
               child: AbsorbPointer(
                 absorbing: true,
                 child: SimpleTf(
+                  editabled: !isFromEdit,
                   controller: controllerStartTime,
                   title: "Start Time",
                   hintWithSelected: true,
@@ -321,10 +370,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               height: 20,
             ),
             InkWell(
-              onTap: () => _selectTime(false),
+              onTap: () {
+                if (!isFromEdit) _selectTime(false);
+              },
               child: AbsorbPointer(
                 absorbing: true,
                 child: SimpleTf(
+                  editabled: !isFromEdit,
                   controller: controllerEndTime,
                   title: "End Time",
                   hintWithSelected: true,
@@ -344,15 +396,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               height: 60,
             ),
             ElevatedBtn(
-              onTap: () {
+              onTap: () async {
                 var newImage = false;
                 if (validateFields().isEmpty) {
                   //api call
                   imagesList.forEach((element) {
-                    if (element.contains(GlobalVariable.bundel)) {
+                    if (element.img.contains(GlobalVariable.bundel)) {
                       newImage = true;
                     }
                   });
+                  for (var item in deleteImages) {
+                    await deleteImagesApi(context, item);
+                  }
+
                   if (newImage) {
                     createEventApi(context);
                   } else {
@@ -378,19 +434,25 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       lastDate: DateTime(3021, 12),
     );
     if (isStartDate) {
-      selectedDate = date!;
+      if (selectedEndDate.isBefore(date!)) {
+        controllerEndDate.text = "";
+      }
+      selectedDate = date;
       controllerStartDate.text =
           CommonFunctions().daeTimeToStringDateorTime(date, "");
       controllerEndTime.text = "";
+      controllerStartTime.text = "";
     } else {
       if (selectedDate.isAfter(date!)) {
         Fluttertoast.showToast(msg: "Please select future date");
         controllerEndDate.text = "";
       } else {
+        selectedEndDate = date;
         controllerEndDate.text =
             CommonFunctions().daeTimeToStringDateorTime(date, "");
       }
       controllerEndTime.text = "";
+      controllerStartTime.text = "";
     }
   }
 
@@ -484,7 +546,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   String? selectedImage = await ImagePickerUtility()
                       .pickImageFromCamera(isCropping: true);
                   print(selectedImage);
-                  imagesList.add(selectedImage!);
+                  imagesList.add(EventImagesModel('', selectedImage!));
                   setState(() {});
                 },
                 child: Row(
@@ -516,7 +578,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   Get.back();
                   String? selectedImage = await ImagePickerUtility()
                       .pickImageFromGallery(isCropping: true);
-                  imagesList.add(selectedImage!);
+                  imagesList.add(EventImagesModel('', selectedImage!));
                   setState(() {});
                 },
                 child: Row(
@@ -587,11 +649,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (isFromEdit) {
       body['eventId'] = eventId;
     }
-    List<String> imagesListData = [];
+    List<EventImagesModel> imagesListData = [];
     imagesListData.clear();
     for (var element in imagesList) {
-      if (element.contains(GlobalVariable.bundel)) {
-        imagesListData.add(element);
+      if (element.img.contains(GlobalVariable.bundel)) {
+        imagesListData.add(EventImagesModel(element.id, element.img));
       }
     }
     print(imagesListData);
@@ -605,7 +667,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     request.fields.addAll(body);
     List<http.MultipartFile> files = [];
     for (var element in imagesListData) {
-      var multipartFile = await http.MultipartFile.fromPath('images', element);
+      var multipartFile =
+          await http.MultipartFile.fromPath('images', element.img);
       files.add(multipartFile);
     }
 
@@ -695,6 +758,47 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
+  Future deleteImagesApi(BuildContext ctx, String imageId) async {
+    Map<String, String> body = {
+      "id": imageId,
+    };
+    print(imagesList);
+    EasyLoading.show(status: 'Loading');
+    var connectivityResult = await (Connectivity().checkConnectivity());
+
+    if (!(connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi)) {
+      throw new Exception('NO INTERNET CONNECTION');
+    }
+    var response = await http.put(
+        Uri.parse(GlobalVariable.baseUrl + GlobalVariable.deleteImages),
+        headers: await CommonFunctions().getHeader(),
+        body: body);
+
+    // if (response.statusCode == 201) {}
+    print(response.body);
+    try {
+      Map<String, dynamic> res = json.decode(response.body);
+
+      if (res['code'] != 200 || res == null) {
+        String error = res['msg'];
+        // Fluttertoast.showToast(msg: error, toastLength: Toast.LENGTH_SHORT);
+        // Navigator.pop(ctx);
+        print("scasd  " + error);
+        throw new Exception(error);
+      }
+      EasyLoading.dismiss();
+    } catch (error) {
+      EasyLoading.dismiss();
+
+      Fluttertoast.showToast(
+          msg: error.toString().substring(
+              error.toString().indexOf(':') + 1, error.toString().length),
+          toastLength: Toast.LENGTH_SHORT);
+      throw error.toString();
+    }
+  }
+
   Future<GetCategoriesResponse> categoryListApi(BuildContext ctx) async {
     EasyLoading.show(status: 'Loading');
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -736,4 +840,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       throw error.toString();
     }
   }
+}
+
+class EventImagesModel {
+  var id = '';
+  var img = '';
+
+  EventImagesModel(this.id, this.img);
 }

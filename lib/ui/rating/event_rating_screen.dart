@@ -182,7 +182,6 @@ class _EventRatingScreen extends State<EventRatingScreen> {
                           textColor: AppColor.whiteColor,
                           onTap: () {
                             Get.back();
-                            Get.back();
                           },
                         )),
                       ],
@@ -190,6 +189,8 @@ class _EventRatingScreen extends State<EventRatingScreen> {
                   ],
                 ),
               ),
-            ));
+            )).then((value) {
+      Get.back();
+    });
   }
 }

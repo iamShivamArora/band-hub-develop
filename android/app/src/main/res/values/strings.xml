@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Band Hub</string>
+    <string name="facebook_client_token">3d52f1b545324ceb532e94c81ceab925</string>
+    <string name="facebook_app_id">5210673452343064</string>
+    <string name="fb_login_protocol_scheme">fb5210673452343064</string>
+
+</resources>

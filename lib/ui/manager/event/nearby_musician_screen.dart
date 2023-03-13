@@ -129,19 +129,22 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                   itemBuilder: ((context, index) {
                                     return InkWell(
                                       onTap: () async {
-                                        await Get.toNamed(
-                                            Routes.musicianDetailScreen,
-                                            arguments: {
-                                              'userId': resultData!
-                                                  .body[index].id
-                                                  .toString(),
-                                              'eventId': eventId,
-                                              'isInvited': resultData!
-                                                      .body[index].isInvited ==
-                                                  1
-                                            });
-                                        listingApi();
-                                        setState(() {});
+                                        if (!EasyLoading.isShow) {
+                                          await Get.toNamed(
+                                              Routes.musicianDetailScreen,
+                                              arguments: {
+                                                'userId': resultData!
+                                                    .body[index].id
+                                                    .toString(),
+                                                'eventId': eventId,
+                                                'isInvited': resultData!
+                                                        .body[index]
+                                                        .isInvited ==
+                                                    1
+                                              });
+                                          listingApi();
+                                          setState(() {});
+                                        }
                                       },
                                       child: Container(
                                         margin:
@@ -188,20 +191,41 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Row(
-                                                      children: [
-                                                        Image.asset(
-                                                            'assets/images/ic_location_mark.png',
-                                                            height: 12),
-                                                        AppText(
-                                                          text:
-                                                              " ${index + 1} miles",
-                                                          textSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                        ),
-                                                      ],
-                                                    ),
+                                                    resultData!.body[index]
+                                                                .distance ==
+                                                            null
+                                                        ? Container()
+                                                        : Row(
+                                                            children: [
+                                                              Image.asset(
+                                                                  'assets/images/ic_location_mark.png',
+                                                                  height: 12),
+                                                              Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .only(
+                                                                        left:
+                                                                            8.0),
+                                                                child: AppText(
+                                                                  text: resultData!
+                                                                              .body[
+                                                                                  index]
+                                                                              .distance ==
+                                                                          null
+                                                                      ? ""
+                                                                      : resultData!
+                                                                          .body[
+                                                                              index]
+                                                                          .distance
+                                                                          .toString(),
+                                                                  textSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
                                                   ],
                                                 )
                                               ],
@@ -210,18 +234,21 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                               children: [
                                                 GestureDetector(
                                                   onTap: () async {
-                                                    var success =
-                                                        await changeFavStatusApi(
-                                                            context,
-                                                            resultData!
-                                                                .body[index].id
-                                                                .toString(),
-                                                            //resultData!.body[index].isFav ? "2":
-                                                            "1");
-                                                    // if(success){
-                                                    //  resultData!.body[index].isFav = !snapshot.data!.body[index].isFav;
-                                                    // }
-                                                    setState(() {});
+                                                    if (!EasyLoading.isShow) {
+                                                      var success =
+                                                          await changeFavStatusApi(
+                                                              context,
+                                                              resultData!
+                                                                  .body[index]
+                                                                  .id
+                                                                  .toString(),
+                                                              //resultData!.body[index].isFav ? "2":
+                                                              "1");
+                                                      // if(success){
+                                                      //  resultData!.body[index].isFav = !snapshot.data!.body[index].isFav;
+                                                      // }
+                                                      setState(() {});
+                                                    }
                                                   },
                                                   child: Image.asset(
                                                     //resultData!.body[index].isFav?
@@ -238,21 +265,25 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                                                         0
                                                     ? GestureDetector(
                                                         onTap: () {
-                                                          showDeclineDialog(
-                                                              resultData!
-                                                                  .body[index]
-                                                                  .fullName,
-                                                              resultData!
-                                                                  .body[index]
-                                                                  .id
-                                                                  .toString());
+                                                          if (!EasyLoading
+                                                              .isShow) {
+                                                            showDeclineDialog(
+                                                                resultData!
+                                                                    .body[index]
+                                                                    .fullName,
+                                                                resultData!
+                                                                    .body[index]
+                                                                    .id
+                                                                    .toString());
+                                                          }
                                                         },
                                                         child: Container(
                                                           padding:
-                                                              const EdgeInsets.all(5),
-                                                    decoration: BoxDecoration(
-                                                        color:
-                                                            AppColor.appColor,
+                                                              const EdgeInsets
+                                                                  .all(5),
+                                                          decoration: BoxDecoration(
+                                                              color: AppColor
+                                                                  .appColor,
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
@@ -289,7 +320,8 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
     var body = {'categoryId': catId, 'eventId': eventId};
     var response = await http.put(
         Uri.parse(GlobalVariable.baseUrl + GlobalVariable.userListByCat),
-        headers: await CommonFunctions().getHeader(),body: body);
+        headers: await CommonFunctions().getHeader(),
+        body: body);
 
     print(response.body);
     try {
@@ -315,11 +347,12 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
       throw error.toString();
     }
   }
+
   Future<bool> changeFavStatusApi(
-      BuildContext ctx, String id,String status) async {
+      BuildContext ctx, String id, String status) async {
     Map<String, String> data = {
       'id': id,
-      'status': status  //1= favourite , 2 = unfavourite
+      'status': status //1= favourite , 2 = unfavourite
     };
     EasyLoading.show(status: 'Loading');
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -345,6 +378,7 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
 
       EasyLoading.dismiss();
       Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+      listingApi();
       return res['code'] != 200;
     } catch (error) {
       EasyLoading.dismiss();
@@ -369,42 +403,42 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 decoration: BoxDecoration(
-                color: AppColor.whiteColor,
-                borderRadius: BorderRadius.circular(15)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/images/ic_question_mark.png',
-                  height: 70,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-
-                AppText(
-                    text: "Are you sure you want to send\ninvite to $username?",
-                    textColor: AppColor.blackColor,
-                    textAlign: TextAlign.center,
-                    textSize: 12,
-                    fontWeight: FontWeight.w400),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
+                    color: AppColor.whiteColor,
+                    borderRadius: BorderRadius.circular(15)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                        child: ElevatedStrokeBtn(
+                    Image.asset(
+                      'assets/images/ic_question_mark.png',
+                      height: 70,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    AppText(
+                        text:
+                            "Are you sure you want to send\ninvite to $username?",
+                        textColor: AppColor.blackColor,
+                        textAlign: TextAlign.center,
+                        textSize: 12,
+                        fontWeight: FontWeight.w400),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: ElevatedStrokeBtn(
                           text: 'No',
                           onTap: () {
                             Get.back();
                           },
                         )),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                        child: ElevatedBtn(
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                            child: ElevatedBtn(
                           text: 'Yes',
                           buttonColor: AppColor.appColor,
                           textColor: AppColor.whiteColor,
@@ -447,6 +481,7 @@ class _NearbyMusicianScreenState extends State<NearbyMusicianScreen> {
 
       EasyLoading.dismiss();
       Fluttertoast.showToast(msg: res['msg'], toastLength: Toast.LENGTH_SHORT);
+      listingApi();
       return res['code'] != 200;
     } catch (error) {
       EasyLoading.dismiss();

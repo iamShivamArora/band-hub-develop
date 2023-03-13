@@ -31,7 +31,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: AppColor.whiteColor,
-        appBar: HelperWidget.customAppBar(title: 'My Orders'),
+        appBar: HelperWidget.customAppBar(title: 'My Events'),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

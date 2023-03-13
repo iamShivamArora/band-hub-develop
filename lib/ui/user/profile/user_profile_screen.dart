@@ -7,16 +7,17 @@ import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/custom_phone_text_field.dart';
 import 'package:band_hub/widgets/custom_text_field.dart';
 import 'package:band_hub/widgets/elevated_btn.dart';
-import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:band_hub/widgets/image_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../models/get_categories_response.dart';
+import '../../../models/profile_response.dart';
 import '../../../util/common_funcations.dart';
 import '../../../util/global_variable.dart';
 import '../../../widgets/country_picker/country.dart';
@@ -51,7 +52,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   void initState() {
-    getProfileApi(context);
+    getProfileApi(context, true);
 
     super.initState();
   }
@@ -59,12 +60,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   getCategoryList() async {
     GetCategoriesResponse result = await categoryListApi(context);
     for (var element in result.body) {
-      categoryList.add(CategoryModel(
-          name: element.name,
-          id: element.id.toString(),
-          underLine: false,
-          isSelected: category.contains(element.name)));
+      if (element.isapprove == 0) {
+        categoryList.add(CategoryModel(
+            name: element.name + " (Pending)",
+            id: element.id.toString(),
+            underLine: false,
+            isSelected: category.contains(element.name)));
+      } else {
+        categoryList.add(CategoryModel(
+            name: element.name,
+            id: element.id.toString(),
+            underLine: false,
+            isSelected: category.contains(element.name)));
+      }
     }
+
     selectedCategoryList
         .addAll(categoryList.where((element) => element.isSelected));
 
@@ -148,6 +158,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     SimpleTf(
                       controller: controllerCat,
                       hint: "Enter Category",
+                      maxLength: 30,
                       inputType: TextInputType.text,
                       action: TextInputAction.done,
                     ),
@@ -199,528 +210,636 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: AppColor.whiteColor,
-        appBar: HelperWidget.customAppBar(
-            title: isEditProfile ? "Edit Profile" : 'My Profile'),
-        body: SingleChildScrollView(
-          child: gotData
-              ? GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () =>
-                      FocusScope.of(context).requestFocus(FocusScopeNode()),
-                  child: Stack(
-                    children: [
-                      Container(
-                        color: const Color(0xffE9E9E9),
-                        height: 150,
-                      ),
-                      Column(
-                        children: [
-                          const SizedBox(
-                            height: 75,
-                          ),
-                          Center(
-                            child: InkWell(
-                              onTap: () {
-                                if (isEditProfile) {
-                                  showImagePicker();
-                                }
-                              },
-                              child: Container(
-                                height: 150,
-                                width: 150,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color:
-                                              AppColor.grayColor.withAlpha(80),
-                                          blurRadius: 10.0,
-                                          offset: const Offset(0, 4)),
-                                    ]),
-                                child: Stack(children: [
-                                  SizedBox(
-                                      height: 150,
-                                      width: 150,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        child: imageFile.isNotEmpty
-                                            ? imageFile.contains(
-                                                    GlobalVariable.imageUrl)
-                                                ? Image.network(
-                                                    imageFile,
-                                                    fit: BoxFit.cover,
-                                                  )
-                                                : Image.file(
-                                                    File(imageFile),
-                                                    fit: BoxFit.cover,
-                                                  )
-                                            : Image.asset(
-                                                'assets/images/ic_user.png'),
-                                      )),
-                                  Visibility(
-                                    visible: isEditProfile,
-                                    child: Positioned(
-                                        bottom: 0,
-                                        right: 0,
-                                        child: Image.asset(
-                                          'assets/images/ic_camera_red.png',
-                                          height: 40,
+    return WillPopScope(
+      onWillPop: () async {
+        if (!EasyLoading.isShow) {
+          if (isEditProfile) {
+            isEditProfile = false;
+            getProfileApi(context, false);
+            return false;
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      },
+      child: Scaffold(
+          backgroundColor: AppColor.whiteColor,
+          appBar: AppBar(
+              backgroundColor: AppColor.whiteColor,
+              title: AppText(
+                text: isEditProfile ? "Edit Profile" : 'My Profile',
+                fontWeight: FontWeight.w400,
+                textColor: Colors.black,
+                textSize: 18,
+              ),
+              leading: Container(
+                margin: const EdgeInsets.only(left: 10),
+                child: IconButton(
+                  icon: Image.asset(
+                    'assets/images/ic_back.png',
+                    height: 22,
+                  ),
+                  onPressed: () {
+                    if (!EasyLoading.isShow) {
+                      if (isEditProfile) {
+                        isEditProfile = false;
+                        getProfileApi(context, false);
+                        // setState(() {});
+                      } else {
+                        Get.back();
+                      }
+                    }
+                  },
+                ),
+              ),
+              centerTitle: true,
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+              actions: [
+                isEditProfile
+                    ? Container()
+                    : GestureDetector(
+                        onTap: () {
+                          if (!isEditProfile) {
+                            isEditProfile = true;
+                            setState(() {});
+                          } else {
+                            // api call
+                            if (validation().isEmpty) {
+                              if (imageFile.contains(GlobalVariable.imageUrl)) {
+                                editProfileApi(context);
+                              } else {
+                                editProfileApiWithImage(context);
+                              }
+                            } else {
+                              Fluttertoast.showToast(msg: validation());
+                            }
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Icon(Icons.edit, color: AppColor.appColor),
+                        ),
+                      )
+              ],
+              systemOverlayStyle: const SystemUiOverlayStyle(
+                statusBarColor: Colors.white,
+                statusBarIconBrightness: Brightness.dark,
+                statusBarBrightness: Brightness.light,
+              )),
+          body: SingleChildScrollView(
+            child: gotData
+                ? GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () =>
+                        FocusScope.of(context).requestFocus(FocusScopeNode()),
+                    child: Stack(
+                      children: [
+                        Container(
+                          color: const Color(0xffE9E9E9),
+                          height: 150,
+                        ),
+                        Column(
+                          children: [
+                            const SizedBox(
+                              height: 75,
+                            ),
+                            Center(
+                              child: InkWell(
+                                onTap: () {
+                                  if (!EasyLoading.isShow) {
+                                    if (isEditProfile) {
+                                      showImagePicker();
+                                    }
+                                  }
+                                },
+                                child: Container(
+                                  height: 150,
+                                  width: 150,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(100),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: AppColor.grayColor
+                                                .withAlpha(80),
+                                            blurRadius: 10.0,
+                                            offset: const Offset(0, 4)),
+                                      ]),
+                                  child: Stack(children: [
+                                    SizedBox(
+                                        height: 150,
+                                        width: 150,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: imageFile.isNotEmpty
+                                              ? imageFile.contains(
+                                                      GlobalVariable.imageUrl)
+                                                  ? Image.network(
+                                                      imageFile,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.file(
+                                                      File(imageFile),
+                                                      fit: BoxFit.cover,
+                                                    )
+                                              : Image.asset(
+                                                  'assets/images/ic_user.png'),
                                         )),
-                                  )
-                                ]),
+                                    Visibility(
+                                      visible: isEditProfile,
+                                      child: Positioned(
+                                          bottom: 0,
+                                          right: 0,
+                                          child: Image.asset(
+                                            'assets/images/ic_camera_red.png',
+                                            height: 40,
+                                          )),
+                                    )
+                                  ]),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          AppText(
-                            text: controllerName.text.trim().toString(),
-                            fontWeight: FontWeight.w600,
-                            textSize: 18,
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              children: [
-                                isEditProfile
-                                    ? Container(
-                                        width: Get.width,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15, vertical: 20),
-                                        decoration: BoxDecoration(
-                                            color: AppColor.whiteColor,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                  color: AppColor.grayColor
-                                                      .withAlpha(80),
-                                                  blurRadius: 10.0,
-                                                  offset: const Offset(0, 4)),
-                                            ]),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SimpleTf(
-                                              controller: controllerName,
-                                              title: 'Full Name',
-                                              height: 45,
-                                              maxLength: 25,
-                                            ),
-                                            const SizedBox(
-                                              height: 15,
-                                            ),
-                                            SimplePhoneTf(
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            AppText(
+                              text: controllerName.text.trim().toString(),
+                              fontWeight: FontWeight.w600,
+                              textSize: 18,
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                children: [
+                                  isEditProfile
+                                      ? Container(
+                                          width: Get.width,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15, vertical: 20),
+                                          decoration: BoxDecoration(
+                                              color: AppColor.whiteColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: AppColor.grayColor
+                                                        .withAlpha(80),
+                                                    blurRadius: 10.0,
+                                                    offset: const Offset(0, 4)),
+                                              ]),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SimpleTf(
+                                                controller: controllerName,
+                                                title: 'Full Name',
+                                                height: 45,
+                                                maxLength: 25,
+                                              ),
+                                              const SizedBox(
+                                                height: 15,
+                                              ),
+                                              SimplePhoneTf(
+                                                  editabled: false,
+                                                  controller: controllerNumber,
+                                                  selectedCountry:
+                                                      selectedCountryIsoName,
+                                                  title: 'Phone Number',
+                                                  onChanged: (_) {
+                                                    countryCode =
+                                                        "+" + _.dialingCode;
+                                                    getCountryIso(
+                                                        "+" + _.dialingCode);
+                                                    setState(() {});
+                                                  },
+                                                  height: 45),
+                                              const SizedBox(
+                                                height: 15,
+                                              ),
+                                              SimpleTf(
                                                 editabled: false,
-                                                controller: controllerNumber,
-                                                selectedCountry:
-                                                    selectedCountryIsoName,
-                                                title: 'Phone Number',
-                                                onChanged: (_) {
-                                                  countryCode =
-                                                      "+" + _.dialingCode;
-                                                  getCountryIso(
-                                                      "+" + _.dialingCode);
+                                                controller: controllerEmail,
+                                                title: 'Email',
+                                                height: 45,
+                                              ),
+                                              const SizedBox(
+                                                height: 15,
+                                              ),
+                                              InkWell(
+                                                onTap: () => Get.toNamed(
+                                                        Routes.mapScreen)!
+                                                    .then((value) {
+                                                  controllerLocation.text =
+                                                      value['location'] ?? "";
+                                                  lat = value['lat'] ?? "";
+                                                  lng = value['lng'] ?? "";
                                                   setState(() {});
-                                                },
-                                                height: 45),
-                                            const SizedBox(
-                                              height: 15,
-                                            ),
-                                            SimpleTf(
-                                              editabled: false,
-                                              controller: controllerEmail,
-                                              title: 'Email',
-                                              height: 45,
-                                            ),
-                                            const SizedBox(
-                                              height: 15,
-                                            ),
-                                            InkWell(
-                                              onTap: () =>
-                                                  Get.toNamed(Routes.mapScreen)!
-                                                      .then((value) {
-                                                controllerLocation.text =
-                                                    value['location'] ?? "";
-                                                lat = value['lat'] ?? "";
-                                                lng = value['lng'] ?? "";
-                                                setState(() {});
-                                              }),
-                                              child: AbsorbPointer(
-                                                absorbing: true,
-                                                child: SimpleTf(
-                                                  controller:
-                                                      controllerLocation,
-                                                  title: "Location",
-                                                  lines: controllerLocation
-                                                              .text.length >
-                                                          50
-                                                      ? 2
-                                                      : 1,
-                                                  height: controllerLocation
-                                                              .text.length >
-                                                          50
-                                                      ? 80
-                                                      : 50,
+                                                }),
+                                                child: AbsorbPointer(
+                                                  absorbing: true,
+                                                  child: SimpleTf(
+                                                    controller:
+                                                        controllerLocation,
+                                                    title: "Location",
+                                                    lines: controllerLocation
+                                                                .text.length >
+                                                            50
+                                                        ? 2
+                                                        : 1,
+                                                    height: controllerLocation
+                                                                .text.length >
+                                                            50
+                                                        ? 80
+                                                        : 50,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            const SizedBox(
-                                              height: 15,
-                                            ),
-                                            Text(
-                                              'Categories',
-                                              style: TextStyle(
-                                                  color: AppColor.blackColor,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 13),
-                                            ),
-                                            Container(
-                                                height: 50,
-                                                margin: const EdgeInsets.only(
-                                                    top: 2),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 15),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    border: Border.all(
-                                                        color:
-                                                            AppColor.grayColor,
-                                                        width: 1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12)),
-                                                child:
-                                                    DropdownButtonHideUnderline(
-                                                  child: DropdownButton<
-                                                      CategoryModel>(
-                                                    isExpanded: true,
-                                                    elevation: 2,
-                                                    isDense: true,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                    hint: AppText(
-                                                        text: category.isEmpty
-                                                            ? "Select Categories"
-                                                            : category,
-                                                        textColor:
-                                                            AppColor.blackColor,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        textSize: 13),
-                                                    items: categoryList.map(
-                                                        (CategoryModel value) {
-                                                      return DropdownMenuItem<
-                                                          CategoryModel>(
-                                                        value: value,
-                                                        child: Row(
-                                                          children: [
-                                                            Expanded(
-                                                                child: AppText(
-                                                              text: value.name,
-                                                              textColor: value
-                                                                          .underLine ??
-                                                                      false
-                                                                  ? AppColor
-                                                                      .appColor
-                                                                  : AppColor
-                                                                      .blackColor,
-                                                              underline: value
-                                                                      .underLine ??
-                                                                  false,
-                                                              textSize: 14,
-                                                            )),
-                                                            Visibility(
-                                                              visible: !(value
-                                                                      .underLine ??
-                                                                  false),
-                                                              child: SizedBox(
-                                                                height: 16,
-                                                                width: 16,
-                                                                child: Stack(
-                                                                  children: [
-                                                                    Image.asset(
-                                                                      'assets/images/ic_check_box.png',
-                                                                      height:
-                                                                          16,
-                                                                      width: 16,
-                                                                    ),
-                                                                    Visibility(
-                                                                      visible: value
-                                                                          .isSelected,
-                                                                      child: Positioned.fill(
-                                                                          child: Align(
-                                                                              alignment: Alignment.center,
-                                                                              child: Image.asset(
-                                                                                'assets/images/ic_tick.png',
-                                                                                height: 10,
-                                                                                width: 10,
-                                                                              ))),
-                                                                    ),
-                                                                  ],
+                                              const SizedBox(
+                                                height: 15,
+                                              ),
+                                              Text(
+                                                'Categories',
+                                                style: TextStyle(
+                                                    color: AppColor.blackColor,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 13),
+                                              ),
+                                              Container(
+                                                  height: 50,
+                                                  margin: const EdgeInsets.only(
+                                                      top: 2),
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 15),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                          color: AppColor
+                                                              .grayColor,
+                                                          width: 1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12)),
+                                                  child:
+                                                      DropdownButtonHideUnderline(
+                                                    child: DropdownButton<
+                                                        CategoryModel>(
+                                                      isExpanded: true,
+                                                      elevation: 2,
+                                                      isDense: true,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                      hint: AppText(
+                                                          text: category.isEmpty
+                                                              ? "Select Categories"
+                                                              : category,
+                                                          textColor: AppColor
+                                                              .blackColor,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          textSize: 13),
+                                                      items: categoryList.map(
+                                                          (CategoryModel
+                                                              value) {
+                                                        return DropdownMenuItem<
+                                                            CategoryModel>(
+                                                          value: value,
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                  child:
+                                                                      AppText(
+                                                                text:
+                                                                    value.name,
+                                                                textColor: value
+                                                                            .underLine ??
+                                                                        false
+                                                                    ? AppColor
+                                                                        .appColor
+                                                                    : AppColor
+                                                                        .blackColor,
+                                                                underline: value
+                                                                        .underLine ??
+                                                                    false,
+                                                                textSize: 14,
+                                                              )),
+                                                              Visibility(
+                                                                visible: !(value
+                                                                        .underLine ??
+                                                                    false),
+                                                                child: SizedBox(
+                                                                  height: 16,
+                                                                  width: 16,
+                                                                  child: Stack(
+                                                                    children: [
+                                                                      Image
+                                                                          .asset(
+                                                                        'assets/images/ic_check_box.png',
+                                                                        height:
+                                                                            16,
+                                                                        width:
+                                                                            16,
+                                                                      ),
+                                                                      Visibility(
+                                                                        visible:
+                                                                            value.isSelected,
+                                                                        child: Positioned.fill(
+                                                                            child: Align(
+                                                                                alignment: Alignment.center,
+                                                                                child: Image.asset(
+                                                                                  'assets/images/ic_tick.png',
+                                                                                  height: 10,
+                                                                                  width: 10,
+                                                                                ))),
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      );
-                                                    }).toList(),
-                                                    onChanged: (value) {
-                                                      if ((value?.underLine ??
-                                                          false)) {
-                                                        showCatrgoryDialog();
-                                                      } else {
-                                                        if (value!.id == "0") {
-                                                          if (value
-                                                              .isSelected) {
-                                                            value.isSelected =
-                                                                false;
-                                                            // if (category.contains(value.name.toString())) {
-                                                            category = category
-                                                                .replaceAll(
-                                                                    value.name
-                                                                            .toString() +
-                                                                        ",",
-                                                                    '');
-                                                            selectedAddedCategories
-                                                                .remove(value);
-                                                            setState(() {});
-                                                            return;
-                                                            // }
-                                                          }
-                                                          value.isSelected =
-                                                              true;
-                                                          category += value.name
-                                                                  .toString() +
-                                                              ",";
-                                                          selectedAddedCategories
-                                                              .add(value);
+                                                              )
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                      onChanged: (value) {
+                                                        if ((value?.underLine ??
+                                                            false)) {
+                                                          showCatrgoryDialog();
                                                         } else {
-                                                          if (value
-                                                              .isSelected) {
+                                                          if (value!.id ==
+                                                              "0") {
+                                                            if (value
+                                                                .isSelected) {
+                                                              value.isSelected =
+                                                                  false;
+                                                              // if (category.contains(value.name.toString())) {
+                                                              category = category
+                                                                  .replaceAll(
+                                                                      value.name
+                                                                              .toString() +
+                                                                          ",",
+                                                                      '');
+                                                              selectedAddedCategories
+                                                                  .remove(
+                                                                      value);
+                                                              setState(() {});
+                                                              return;
+                                                              // }
+                                                            }
                                                             value.isSelected =
-                                                                false;
-                                                            // if (category.contains(value.name.toString())) {
-                                                            category = category
-                                                                .replaceAll(
-                                                                    value.name
-                                                                            .toString() +
-                                                                        ",",
-                                                                    '')
+                                                                true;
+                                                            category += value
+                                                                    .name
+                                                                    .toString() +
+                                                                ",";
+                                                            selectedAddedCategories
+                                                                .add(value);
+                                                          } else {
+                                                            if (value
+                                                                .isSelected) {
+                                                              value.isSelected =
+                                                                  false;
+                                                              // if (category.contains(value.name.toString())) {
+                                                              category = category
+                                                                  .replaceAll(
+                                                                      value.name
+                                                                              .toString() +
+                                                                          ",",
+                                                                      '')
+                                                                  .trim();
+                                                              selectedCategoryList
+                                                                  .remove(
+                                                                      value);
+                                                              setState(() {});
+                                                              return;
+                                                              // }
+                                                            }
+                                                            value.isSelected =
+                                                                true;
+                                                            category += (value
+                                                                        .name
+                                                                        .toString() +
+                                                                    ",")
                                                                 .trim();
                                                             selectedCategoryList
-                                                                .remove(value);
-                                                            setState(() {});
-                                                            return;
-                                                            // }
+                                                                .add(value);
                                                           }
-                                                          value.isSelected =
-                                                              true;
-                                                          category += (value
-                                                                      .name
-                                                                      .toString() +
-                                                                  ",")
-                                                              .trim();
-                                                          selectedCategoryList
-                                                              .add(value);
                                                         }
-                                                      }
-                                                      setState(() {});
-                                                    },
-                                                  ),
-                                                )),
-                                            const SizedBox(
-                                              height: 15,
-                                            ),
-                                            SimpleTf(
-                                              controller: controllerDes,
-                                              title: 'Description',
-                                              height: 45,
-                                            ),
-                                          ],
-                                        ))
-                                    : Container(
-                                        width: Get.width,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15, vertical: 20),
-                                        decoration: BoxDecoration(
-                                            color: AppColor.whiteColor,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                  color: AppColor.grayColor
-                                                      .withAlpha(80),
-                                                  blurRadius: 10.0,
-                                                  offset: const Offset(0, 4)),
-                                            ]),
-                                        child: Column(children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              AppText(
-                                                text: 'Name',
-                                                textSize: 13,
+                                                        setState(() {});
+                                                      },
+                                                    ),
+                                                  )),
+                                              const SizedBox(
+                                                height: 15,
                                               ),
-                                              AppText(
-                                                text: controllerName.text
-                                                    .trim()
-                                                    .toString(),
-                                                textSize: 13,
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              AppText(
-                                                text: 'Email',
-                                                textSize: 13,
+                                              SimpleTf(
+                                                controller: controllerDes,
+                                                title: 'Description',
+                                                height: 45,
                                               ),
-                                              AppText(
-                                                text: controllerEmail.text
-                                                    .trim()
-                                                    .toString(),
-                                                textSize: 13,
-                                              )
                                             ],
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              AppText(
-                                                text: 'Phone Number',
-                                                textSize: 13,
-                                              ),
-                                              AppText(
-                                                text: countryCode +
-                                                    " " +
-                                                    controllerNumber.text
-                                                        .trim()
-                                                        .toString(),
-                                                textSize: 13,
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              AppText(
-                                                text: 'Description',
-                                                textSize: 13,
-                                              ),
-                                              AppText(
-                                                text: controllerDes.text
-                                                    .trim()
-                                                    .toString(),
-                                                textSize: 13,
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              AppText(
-                                                text: category.contains(',')
-                                                    ? 'Categories'
-                                                    : 'Category',
-                                                textSize: 13,
-                                              ),
-                                              AppText(
-                                                text: category,
-                                                textSize: 13,
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: AppText(
-                                                  text: 'Location',
+                                          ))
+                                      : Container(
+                                          width: Get.width,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15, vertical: 20),
+                                          decoration: BoxDecoration(
+                                              color: AppColor.whiteColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: AppColor.grayColor
+                                                        .withAlpha(80),
+                                                    blurRadius: 10.0,
+                                                    offset: const Offset(0, 4)),
+                                              ]),
+                                          child: Column(children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                AppText(
+                                                  text: 'Name',
                                                   textSize: 13,
                                                 ),
-                                              ),
-                                              Expanded(
-                                                child: AppText(
-                                                  textAlign: TextAlign.end,
-                                                  text: controllerLocation.text
+                                                AppText(
+                                                  text: controllerName.text
                                                       .trim()
                                                       .toString(),
                                                   textSize: 13,
+                                                )
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                AppText(
+                                                  text: 'Email',
+                                                  textSize: 13,
                                                 ),
-                                              )
-                                            ],
-                                          )
-                                        ]),
-                                      ),
-                                const SizedBox(
-                                  height: 30,
-                                ),
-                                ElevatedBtn(
-                                  text:
-                                      isEditProfile ? "Update" : "Edit Profile",
-                                  onTap: () {
-                                    if (!isEditProfile) {
-                                      isEditProfile = true;
-                                      setState(() {});
-                                    } else {
-                                      // api call
-                                      if (validation().isEmpty) {
-                                        if (imageFile.contains(
-                                            GlobalVariable.imageUrl)) {
-                                          editProfileApi(context);
+                                                AppText(
+                                                  text: controllerEmail.text
+                                                      .trim()
+                                                      .toString(),
+                                                  textSize: 13,
+                                                )
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                AppText(
+                                                  text: 'Phone Number',
+                                                  textSize: 13,
+                                                ),
+                                                AppText(
+                                                  text: countryCode +
+                                                      " " +
+                                                      controllerNumber.text
+                                                          .trim()
+                                                          .toString(),
+                                                  textSize: 13,
+                                                )
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                AppText(
+                                                  text: 'Description',
+                                                  textSize: 13,
+                                                ),
+                                                AppText(
+                                                  text: controllerDes.text
+                                                      .trim()
+                                                      .toString(),
+                                                  textSize: 13,
+                                                )
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 8.0),
+                                                  child: AppText(
+                                                    text: category.contains(',')
+                                                        ? 'Categories'
+                                                        : 'Category',
+                                                    textSize: 13,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: AppText(
+                                                    textAlign: TextAlign.end,
+                                                    text: category,
+                                                    textSize: 13,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 8.0),
+                                                  child: AppText(
+                                                    text: 'Location',
+                                                    textSize: 13,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: AppText(
+                                                    textAlign: TextAlign.end,
+                                                    text: controllerLocation
+                                                        .text
+                                                        .trim()
+                                                        .toString(),
+                                                    textSize: 13,
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                          ]),
+                                        ),
+                                  const SizedBox(
+                                    height: 30,
+                                  ),
+                                  ElevatedBtn(
+                                    text: isEditProfile
+                                        ? "Update"
+                                        : "Edit Profile",
+                                    onTap: () {
+                                      if (!EasyLoading.isShow) {
+                                        if (!isEditProfile) {
+                                          isEditProfile = true;
+                                          setState(() {});
                                         } else {
-                                          editProfileApiWithImage(context);
+                                          // api call
+                                          if (validation().isEmpty) {
+                                            if (imageFile.contains(
+                                                GlobalVariable.imageUrl)) {
+                                              editProfileApi(context);
+                                            } else {
+                                              editProfileApiWithImage(context);
+                                            }
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: validation());
+                                          }
                                         }
-                                      } else {
-                                        Fluttertoast.showToast(
-                                            msg: validation());
                                       }
-                                    }
-                                  },
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              : Container(),
-        ));
+                                    },
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                : Container(),
+          )),
+    );
   }
 
   void showImagePicker() {
@@ -814,8 +933,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Future getProfileApi(BuildContext ctx) async {
-    EasyLoading.show(status: 'Loading');
+  Future getProfileApi(BuildContext ctx, bool showLoading) async {
+    if (showLoading) {
+      EasyLoading.show(status: 'Loading');
+    }
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (!(connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi)) {
@@ -840,23 +961,48 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         print("scasd  " + error);
         throw new Exception(error);
       }
-      // LoginResponseModel result = LoginResponseModel.fromJson(res);
-      EasyLoading.dismiss();
+      ProfileResponse result = ProfileResponse.fromJson(res);
+      if (showLoading) {
+        EasyLoading.dismiss();
+      }
+      category = "";
       controllerName.text = res['body']['full_name'];
       controllerEmail.text = res['body']['email'];
       controllerLocation.text = res['body']['location'];
       controllerNumber.text = res['body']['phone'];
       controllerDes.text = res['body']['description'];
-      category = res['body']['categoryName'].toString() + ', ';
+      // category = res['body']['categoryName'].toString() + ', ';
       countryCode = res['body']['countryCode'];
       imageFile = res['body']['profileImage'];
+      if (result.body.categries.isNotEmpty) {
+        for (var item in result.body.categries) {
+          if (item.isapprove == 0) {
+            if (category.isEmpty) {
+              category = item.name + " (Pending), ";
+            } else {
+              category = category + item.name + " (Pending), ";
+            }
+          } else {
+            if (category.isEmpty) {
+              category = item.name + ', ';
+            } else {
+              category = category + item.name + ', ';
+            }
+          }
+        }
+      }
       getCountryIso(countryCode);
-      getCategoryList();
+      if (showLoading) {
+        getCategoryList();
+      }
+
       gotData = true;
 
       setState(() {});
     } catch (error) {
-      EasyLoading.dismiss();
+      if (showLoading) {
+        EasyLoading.dismiss();
+      }
 
       Fluttertoast.showToast(
           msg: error.toString().substring(
@@ -896,6 +1042,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     };
     if (catId.isNotEmpty) {
       body['categoryId'] = catId;
+    }
+    if (addedCatId.isNotEmpty) {
+      body['myCat'] = addedCatId;
     }
     print(body);
     EasyLoading.show(status: 'Loading');
@@ -1018,7 +1167,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   void getCountryIso(String code) {
     for (var element in Country.ALL) {
-      if (code.contains(element.dialingCode)) {
+      if (code == "+" + element.dialingCode) {
         selectedCountryIsoName = element;
       }
     }
@@ -1039,8 +1188,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     } else if (!CommonFunctions()
         .isEmailValid(controllerEmail.text.trim().toString())) {
       return "Please enter valid email";
-    } else if (selectedCategoryList
-        .isEmpty /*&& selectedAddedCategories.isEmpty*/) {
+    } else if (selectedCategoryList.isEmpty &&
+        selectedAddedCategories.isEmpty) {
       return "Please select atleast one category";
     } else if (controllerLocation.text.trim().isEmpty) {
       return "Please select location";

@@ -6,10 +6,10 @@ import 'package:band_hub/widgets/app_text.dart';
 import 'package:band_hub/widgets/custom_phone_text_field.dart';
 import 'package:band_hub/widgets/custom_text_field.dart';
 import 'package:band_hub/widgets/elevated_btn.dart';
-import 'package:band_hub/widgets/helper_widget.dart';
 import 'package:band_hub/widgets/image_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -51,275 +51,325 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: AppColor.whiteColor,
-        appBar: HelperWidget.customAppBar(
-            title: isEditProfile ? "Edit Profile" : 'My Profile'),
-        body: SingleChildScrollView(
-            child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => FocusScope.of(context).requestFocus(FocusScopeNode()),
-          child: Stack(
-            children: [
-              Container(
-                color: const Color(0xffE9E9E9),
-                height: 150,
+    return WillPopScope(
+      onWillPop: () async {
+        if (isEditProfile) {
+          isEditProfile = false;
+          setState(() {});
+          return false;
+        } else {
+          return true;
+        }
+      },
+      child: Scaffold(
+          backgroundColor: AppColor.whiteColor,
+          appBar: AppBar(
+              backgroundColor: AppColor.whiteColor,
+              title: AppText(
+                text: isEditProfile ? "Edit Profile" : 'My Profile',
+                fontWeight: FontWeight.w400,
+                textColor: Colors.black,
+                textSize: 18,
               ),
-              Column(
-                children: [
-                  const SizedBox(
-                    height: 75,
+              leading: Container(
+                margin: const EdgeInsets.only(left: 10),
+                child: IconButton(
+                  icon: Image.asset(
+                    'assets/images/ic_back.png',
+                    height: 22,
                   ),
-                  Center(
-                    child: InkWell(
-                      onTap: () {
-                        if (isEditProfile) {
-                          showImagePicker();
-                        }
-                      },
-                      child: Container(
-                        height: 150,
-                        width: 150,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: AppColor.grayColor.withAlpha(80),
-                                  blurRadius: 10.0,
-                                  offset: const Offset(0, 4)),
-                            ]),
-                        child: Stack(children: [
-                          SizedBox(
-                              height: 150,
-                              width: 150,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: imageFile.isNotEmpty
-                                    ? imageFile
-                                            .contains(GlobalVariable.imageUrl)
-                                        ? Image.network(
-                                            imageFile,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : Image.file(
-                                            File(imageFile),
-                                            fit: BoxFit.cover,
-                                          )
-                                    : Image.asset('assets/images/ic_user.png'),
-                              )),
-                          Visibility(
-                            visible: isEditProfile,
-                            child: Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Image.asset(
-                                  'assets/images/ic_camera_red.png',
-                                  height: 40,
+                  onPressed: () {
+                    if (!EasyLoading.isShow) {
+                      if (isEditProfile) {
+                        isEditProfile = false;
+                        setState(() {});
+                      } else {
+                        Get.back();
+                      }
+                    }
+                  },
+                ),
+              ),
+              centerTitle: true,
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+              systemOverlayStyle: const SystemUiOverlayStyle(
+                statusBarColor: Colors.white,
+                statusBarIconBrightness: Brightness.dark,
+                statusBarBrightness: Brightness.light,
+              )),
+          body: SingleChildScrollView(
+              child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusScope.of(context).requestFocus(FocusScopeNode()),
+            child: Stack(
+              children: [
+                Container(
+                  color: const Color(0xffE9E9E9),
+                  height: 150,
+                ),
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 75,
+                    ),
+                    Center(
+                      child: InkWell(
+                        onTap: () {
+                          if (!EasyLoading.isShow) {
+                            if (isEditProfile) {
+                              showImagePicker();
+                            }
+                          }
+                        },
+                        child: Container(
+                          height: 150,
+                          width: 150,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: AppColor.grayColor.withAlpha(80),
+                                    blurRadius: 10.0,
+                                    offset: const Offset(0, 4)),
+                              ]),
+                          child: Stack(children: [
+                            SizedBox(
+                                height: 150,
+                                width: 150,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: imageFile.isNotEmpty
+                                      ? imageFile
+                                              .contains(GlobalVariable.imageUrl)
+                                          ? Image.network(
+                                              imageFile,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Image.file(
+                                              File(imageFile),
+                                              fit: BoxFit.cover,
+                                            )
+                                      : Image.asset(
+                                          'assets/images/ic_user.png'),
                                 )),
-                          )
-                        ]),
+                            Visibility(
+                              visible: isEditProfile,
+                              child: Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Image.asset(
+                                    'assets/images/ic_camera_red.png',
+                                    height: 40,
+                                  )),
+                            )
+                          ]),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  AppText(
-                    text: controllerName.text,
-                    fontWeight: FontWeight.w600,
-                    textSize: 18,
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        isEditProfile
-                            ? Container(
-                                width: Get.width,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 20),
-                                decoration: BoxDecoration(
-                                    color: AppColor.whiteColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color:
-                                              AppColor.grayColor.withAlpha(80),
-                                          blurRadius: 10.0,
-                                          offset: const Offset(0, 4)),
-                                    ]),
-                                child: Column(
-                                  children: [
-                                    SimpleTf(
-                                      controller: controllerName,
-                                      title: 'Full Name',
-                                      maxLength: 25,
-                                      height: 45,
-                                    ),
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                    SimplePhoneTf(
-                                        editabled: false,
-                                        controller: controllerNumber,
-                                        selectedCountry: selectedCountryIsoName,
-                                        title: 'Phone Number',
-                                        onChanged: (_) {
-                                          countryCode = "+" + _.dialingCode;
-                                          getCountryIso("+" + _.dialingCode);
-                                          setState(() {});
-                                        },
-                                        height: 45),
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                    SimpleTf(
-                                      editabled: false,
-                                      controller: controllerEmail,
-                                      title: 'Email',
-                                      height: 45,
-                                    ),
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                    SimpleTf(
-                                      controller: controllerAbout,
-                                      title: 'About',
-                                      height: 100,
-                                      lines: 4,
-                                    )
-                                  ],
-                                ))
-                            : Container(
-                                width: Get.width,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 20),
-                                decoration: BoxDecoration(
-                                    color: AppColor.whiteColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color:
-                                              AppColor.grayColor.withAlpha(80),
-                                          blurRadius: 10.0,
-                                          offset: const Offset(0, 4)),
-                                    ]),
-                                child: Column(children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    AppText(
+                      text: controllerName.text,
+                      fontWeight: FontWeight.w600,
+                      textSize: 18,
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          isEditProfile
+                              ? Container(
+                                  width: Get.width,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 20),
+                                  decoration: BoxDecoration(
+                                      color: AppColor.whiteColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: AppColor.grayColor
+                                                .withAlpha(80),
+                                            blurRadius: 10.0,
+                                            offset: const Offset(0, 4)),
+                                      ]),
+                                  child: Column(
                                     children: [
-                                      AppText(
-                                        text: 'Name',
-                                        textSize: 13,
-                                      ),
-                                      AppText(
-                                        text: controllerName.text,
-                                        textSize: 13,
-                                      )
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      AppText(
-                                        text: 'Email',
-                                        textSize: 13,
-                                      ),
-                                      AppText(
-                                        text: controllerEmail.text,
-                                        textSize: 13,
-                                      )
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      AppText(
-                                        text: 'Phone Number',
-                                        textSize: 13,
-                                      ),
-                                      AppText(
-                                        text: countryCode +
-                                            " " +
-                                            controllerNumber.text
-                                                .trim()
-                                                .toString(),
-                                        textSize: 13,
-                                      )
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      AppText(
-                                        text: 'About',
-                                        textSize: 13,
+                                      SimpleTf(
+                                        controller: controllerName,
+                                        title: 'Full Name',
+                                        maxLength: 25,
+                                        height: 45,
                                       ),
                                       const SizedBox(
-                                        width: 80,
+                                        height: 15,
                                       ),
-                                      Expanded(
-                                        child: AppText(
-                                          textAlign: TextAlign.right,
-                                          text: controllerAbout.text,
-                                          textSize: 13,
-                                          textColor: AppColor.blackColor,
-                                        ),
+                                      SimplePhoneTf(
+                                          editabled: false,
+                                          controller: controllerNumber,
+                                          selectedCountry:
+                                              selectedCountryIsoName,
+                                          title: 'Phone Number',
+                                          onChanged: (_) {
+                                            countryCode = "+" + _.dialingCode;
+                                            getCountryIso("+" + _.dialingCode);
+                                            setState(() {});
+                                          },
+                                          height: 45),
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
+                                      SimpleTf(
+                                        editabled: false,
+                                        controller: controllerEmail,
+                                        title: 'Email',
+                                        height: 45,
+                                      ),
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
+                                      SimpleTf(
+                                        controller: controllerAbout,
+                                        title: 'About',
+                                        height: 100,
+                                        lines: 4,
                                       )
                                     ],
-                                  )
-                                ]),
-                              ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        ElevatedBtn(
-                          text: isEditProfile ? "Update" : "Edit Profile",
-                          onTap: () {
-                            if (!isEditProfile) {
-                              isEditProfile = true;
-                              setState(() {});
-                            } else {
-                              // api call
-                              if (validation().isEmpty) {
-                                if (imageFile
-                                    .contains(GlobalVariable.imageUrl)) {
-                                  editProfileApi(context);
+                                  ))
+                              : Container(
+                                  width: Get.width,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 20),
+                                  decoration: BoxDecoration(
+                                      color: AppColor.whiteColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: AppColor.grayColor
+                                                .withAlpha(80),
+                                            blurRadius: 10.0,
+                                            offset: const Offset(0, 4)),
+                                      ]),
+                                  child: Column(children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        AppText(
+                                          text: 'Name',
+                                          textSize: 13,
+                                        ),
+                                        AppText(
+                                          text: controllerName.text,
+                                          textSize: 13,
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        AppText(
+                                          text: 'Email',
+                                          textSize: 13,
+                                        ),
+                                        AppText(
+                                          text: controllerEmail.text,
+                                          textSize: 13,
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        AppText(
+                                          text: 'Phone Number',
+                                          textSize: 13,
+                                        ),
+                                        AppText(
+                                          text: countryCode +
+                                              " " +
+                                              controllerNumber.text
+                                                  .trim()
+                                                  .toString(),
+                                          textSize: 13,
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        AppText(
+                                          text: 'About',
+                                          textSize: 13,
+                                        ),
+                                        const SizedBox(
+                                          width: 80,
+                                        ),
+                                        Expanded(
+                                          child: AppText(
+                                            textAlign: TextAlign.right,
+                                            text: controllerAbout.text,
+                                            textSize: 13,
+                                            textColor: AppColor.blackColor,
+                                          ),
+                                        )
+                                      ],
+                                    )
+                                  ]),
+                                ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          ElevatedBtn(
+                            text: isEditProfile ? "Update" : "Edit Profile",
+                            onTap: () {
+                              if (!EasyLoading.isShow) {
+                                if (!isEditProfile) {
+                                  isEditProfile = true;
+                                  setState(() {});
                                 } else {
-                                  editProfileApiWithImage(context);
+                                  // api call
+                                  if (validation().isEmpty) {
+                                    if (imageFile
+                                        .contains(GlobalVariable.imageUrl)) {
+                                      editProfileApi(context);
+                                    } else {
+                                      editProfileApiWithImage(context);
+                                    }
+                                  } else {
+                                    Fluttertoast.showToast(msg: validation());
+                                  }
                                 }
-                              } else {
-                                Fluttertoast.showToast(msg: validation());
                               }
-                            }
-                          },
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ],
-          ),
-        )));
+                            },
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ))),
+    );
   }
 
   void showImagePicker() {

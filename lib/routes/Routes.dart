@@ -41,7 +41,7 @@ class Routes {
   static const String musicianDetailScreen = "/musicianDetailScreen";
   static const String managerProfileScreen = "/managerProfileScreen";
   static const String providerMessageScreen = "/providerMessageScreen";
+  static const String userMessageScreen = "/userMessageScreen";
   static const String newProfileScreen = "/newProfileScreen";
   static const String mapScreen = "/mapScreen";
-
 }

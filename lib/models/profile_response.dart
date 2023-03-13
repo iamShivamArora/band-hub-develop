@@ -1,6 +1,5 @@
-
-class LoginResponseModel {
-  LoginResponseModel({
+class ProfileResponse {
+  ProfileResponse({
     required this.success,
     required this.code,
     required this.msg,
@@ -12,7 +11,7 @@ class LoginResponseModel {
   late final String msg;
   late final Body body;
 
-  LoginResponseModel.fromJson(Map<String, dynamic> json) {
+  ProfileResponse.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     code = json['code'];
     msg = json['msg'];
@@ -61,6 +60,9 @@ class Body {
     required this.createdAt,
     required this.status,
     required this.updatedAt,
+    required this.categries,
+    required this.reviews,
+    required this.events,
   });
 
   late final int id;
@@ -93,6 +95,9 @@ class Body {
   late final String createdAt;
   late final int status;
   late final String updatedAt;
+  late final List<Categries> categries;
+  late final List<dynamic> reviews;
+  late final List<dynamic> events;
 
   Body.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -125,6 +130,10 @@ class Body {
     createdAt = json['createdAt'];
     status = json['status'];
     updatedAt = json['updatedAt'];
+    categries =
+        List.from(json['categries']).map((e) => Categries.fromJson(e)).toList();
+    reviews = List.castFrom<dynamic, dynamic>(json['reviews']);
+    events = List.castFrom<dynamic, dynamic>(json['events']);
   }
 
   Map<String, dynamic> toJson() {
@@ -158,6 +167,55 @@ class Body {
     _data['socialType'] = socialType;
     _data['createdAt'] = createdAt;
     _data['status'] = status;
+    _data['updatedAt'] = updatedAt;
+    _data['categries'] = categries.map((e) => e.toJson()).toList();
+    _data['reviews'] = reviews;
+    _data['events'] = events;
+    return _data;
+  }
+}
+
+class Categries {
+  Categries({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.status,
+    required this.proid,
+    required this.isapprove,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  late final int id;
+  late final String name;
+  late final String type;
+  late final int status;
+  late final int proid;
+  late final int isapprove;
+  late final String createdAt;
+  late final String updatedAt;
+
+  Categries.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    type = json['type'];
+    status = json['status'];
+    proid = json['proid'];
+    isapprove = json['isapprove'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['id'] = id;
+    _data['name'] = name;
+    _data['type'] = type;
+    _data['status'] = status;
+    _data['proid'] = proid;
+    _data['isapprove'] = isapprove;
+    _data['createdAt'] = createdAt;
     _data['updatedAt'] = updatedAt;
     return _data;
   }
